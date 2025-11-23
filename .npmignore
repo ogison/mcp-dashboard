@@ -1,0 +1,30 @@
+# Source files
+src/
+
+# Development files
+*.log
+.DS_Store
+.env
+.vscode/
+.idea/
+
+# Test files
+test/
+tests/
+*.test.ts
+*.spec.ts
+coverage/
+
+# Build configs
+tsconfig*.json
+vite.config.ts
+tailwind.config.js
+postcss.config.js
+
+# Documentation source
+SPEC.md
+IMPLEMENTATION_PLAN.md
+
+# Git
+.git/
+.gitignore

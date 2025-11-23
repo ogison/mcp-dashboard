@@ -1,0 +1,97 @@
+{
+  "presets": [
+    {
+      "id": "filesystem",
+      "name": "Filesystem MCP",
+      "description": "Access local files and directories",
+      "category": "Official",
+      "config": {
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-filesystem", "/path/to/directory"]
+      }
+    },
+    {
+      "id": "git",
+      "name": "Git MCP",
+      "description": "Git repository operations",
+      "category": "Official",
+      "config": {
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-git", "--repository", "/path/to/repo"]
+      }
+    },
+    {
+      "id": "github",
+      "name": "GitHub MCP",
+      "description": "GitHub API integration",
+      "category": "Official",
+      "config": {
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-github"],
+        "env": {
+          "GITHUB_PERSONAL_ACCESS_TOKEN": "<your-token>"
+        }
+      }
+    },
+    {
+      "id": "brave-search",
+      "name": "Brave Search MCP",
+      "description": "Web search capabilities",
+      "category": "Official",
+      "config": {
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-brave-search"],
+        "env": {
+          "BRAVE_API_KEY": "<your-api-key>"
+        }
+      }
+    },
+    {
+      "id": "postgres",
+      "name": "PostgreSQL MCP",
+      "description": "PostgreSQL database operations",
+      "category": "Official",
+      "config": {
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-postgres"],
+        "env": {
+          "POSTGRES_CONNECTION_STRING": "postgresql://user:password@localhost:5432/dbname"
+        }
+      }
+    },
+    {
+      "id": "sqlite",
+      "name": "SQLite MCP",
+      "description": "SQLite database operations",
+      "category": "Official",
+      "config": {
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-sqlite", "/path/to/database.db"]
+      }
+    },
+    {
+      "id": "puppeteer",
+      "name": "Puppeteer MCP",
+      "description": "Browser automation with Puppeteer",
+      "category": "Official",
+      "config": {
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-puppeteer"]
+      }
+    },
+    {
+      "id": "slack",
+      "name": "Slack MCP",
+      "description": "Slack workspace integration",
+      "category": "Official",
+      "config": {
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-slack"],
+        "env": {
+          "SLACK_BOT_TOKEN": "<your-bot-token>",
+          "SLACK_TEAM_ID": "<your-team-id>"
+        }
+      }
+    }
+  ]
+}
