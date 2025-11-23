@@ -4,14 +4,16 @@ import type {
   ValidationResult,
   ApiResponse,
   ConfigPathResponse,
-} from '../types';
+} from "../types";
 
-const API_BASE = '/api';
+const API_BASE = "/api";
 
 async function handleResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ message: 'Request failed' }));
-    throw new Error(error.message || 'Request failed');
+    const error = await response
+      .json()
+      .catch(() => ({ message: "Request failed" }));
+    throw new Error(error.message || "Request failed");
   }
   return response.json();
 }
@@ -24,9 +26,9 @@ export const api = {
 
   async saveConfig(config: MCPConfig): Promise<ApiResponse> {
     const response = await fetch(`${API_BASE}/config`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(config),
     });
@@ -35,9 +37,9 @@ export const api = {
 
   async validateConfig(config: MCPConfig): Promise<ValidationResult> {
     const response = await fetch(`${API_BASE}/config/validate`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(config),
     });
@@ -60,7 +62,9 @@ export const api = {
   },
 
   async searchPresets(query: string): Promise<{ presets: Preset[] }> {
-    const response = await fetch(`${API_BASE}/presets/search/${encodeURIComponent(query)}`);
+    const response = await fetch(
+      `${API_BASE}/presets/search/${encodeURIComponent(query)}`,
+    );
     return handleResponse<{ presets: Preset[] }>(response);
   },
 };

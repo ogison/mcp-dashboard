@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import type { MCPServer } from '../types';
+import { useState, useEffect } from "react";
+import type { MCPServer } from "../types";
 
 interface ServerModalProps {
   isOpen: boolean;
@@ -9,12 +9,20 @@ interface ServerModalProps {
   server?: MCPServer;
 }
 
-export function ServerModal({ isOpen, onClose, onSave, serverName = '', server }: ServerModalProps) {
+export function ServerModal({
+  isOpen,
+  onClose,
+  onSave,
+  serverName = "",
+  server,
+}: ServerModalProps) {
   const [name, setName] = useState(serverName);
-  const [command, setCommand] = useState(server?.command || '');
+  const [command, setCommand] = useState(server?.command || "");
   const [args, setArgs] = useState<string[]>(server?.args || []);
   const [envVars, setEnvVars] = useState<Array<{ key: string; value: string }>>(
-    server?.env ? Object.entries(server.env).map(([key, value]) => ({ key, value })) : []
+    server?.env
+      ? Object.entries(server.env).map(([key, value]) => ({ key, value }))
+      : [],
   );
   const [disabled, setDisabled] = useState(server?.disabled || false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -22,10 +30,12 @@ export function ServerModal({ isOpen, onClose, onSave, serverName = '', server }
   useEffect(() => {
     if (isOpen) {
       setName(serverName);
-      setCommand(server?.command || '');
+      setCommand(server?.command || "");
       setArgs(server?.args || []);
       setEnvVars(
-        server?.env ? Object.entries(server.env).map(([key, value]) => ({ key, value })) : []
+        server?.env
+          ? Object.entries(server.env).map(([key, value]) => ({ key, value }))
+          : [],
       );
       setDisabled(server?.disabled || false);
       setErrors({});
@@ -36,11 +46,11 @@ export function ServerModal({ isOpen, onClose, onSave, serverName = '', server }
     const newErrors: Record<string, string> = {};
 
     if (!name.trim()) {
-      newErrors.name = 'Server name is required';
+      newErrors.name = "Server name is required";
     }
 
     if (!command.trim()) {
-      newErrors.command = 'Command is required';
+      newErrors.command = "Command is required";
     }
 
     setErrors(newErrors);
@@ -59,7 +69,9 @@ export function ServerModal({ isOpen, onClose, onSave, serverName = '', server }
 
     const serverConfig: MCPServer = {
       command: command.trim(),
-      ...(args.filter(a => a.trim()).length > 0 && { args: args.filter(a => a.trim()) }),
+      ...(args.filter((a) => a.trim()).length > 0 && {
+        args: args.filter((a) => a.trim()),
+      }),
       ...(Object.keys(env).length > 0 && { env }),
       ...(disabled && { disabled }),
     };
@@ -69,7 +81,7 @@ export function ServerModal({ isOpen, onClose, onSave, serverName = '', server }
   };
 
   const addArg = () => {
-    setArgs([...args, '']);
+    setArgs([...args, ""]);
   };
 
   const updateArg = (index: number, value: string) => {
@@ -83,10 +95,14 @@ export function ServerModal({ isOpen, onClose, onSave, serverName = '', server }
   };
 
   const addEnvVar = () => {
-    setEnvVars([...envVars, { key: '', value: '' }]);
+    setEnvVars([...envVars, { key: "", value: "" }]);
   };
 
-  const updateEnvVar = (index: number, field: 'key' | 'value', value: string) => {
+  const updateEnvVar = (
+    index: number,
+    field: "key" | "value",
+    value: string,
+  ) => {
     const newEnvVars = [...envVars];
     newEnvVars[index][field] = value;
     setEnvVars(newEnvVars);
@@ -103,7 +119,7 @@ export function ServerModal({ isOpen, onClose, onSave, serverName = '', server }
       <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
           <h2 className="text-2xl font-bold text-gray-900">
-            {serverName ? 'Edit MCP Server' : 'Add MCP Server'}
+            {serverName ? "Edit MCP Server" : "Add MCP Server"}
           </h2>
           <button
             onClick={onClose}
@@ -124,11 +140,13 @@ export function ServerModal({ isOpen, onClose, onSave, serverName = '', server }
               onChange={(e) => setName(e.target.value)}
               disabled={!!serverName}
               className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary ${
-                errors.name ? 'border-error' : 'border-gray-300'
-              } ${serverName ? 'bg-gray-100' : ''}`}
+                errors.name ? "border-error" : "border-gray-300"
+              } ${serverName ? "bg-gray-100" : ""}`}
               placeholder="e.g., filesystem"
             />
-            {errors.name && <p className="mt-1 text-sm text-error">{errors.name}</p>}
+            {errors.name && (
+              <p className="mt-1 text-sm text-error">{errors.name}</p>
+            )}
           </div>
 
           <div>
@@ -140,15 +158,19 @@ export function ServerModal({ isOpen, onClose, onSave, serverName = '', server }
               value={command}
               onChange={(e) => setCommand(e.target.value)}
               className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary ${
-                errors.command ? 'border-error' : 'border-gray-300'
+                errors.command ? "border-error" : "border-gray-300"
               }`}
               placeholder="e.g., npx"
             />
-            {errors.command && <p className="mt-1 text-sm text-error">{errors.command}</p>}
+            {errors.command && (
+              <p className="mt-1 text-sm text-error">{errors.command}</p>
+            )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Arguments</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Arguments
+            </label>
             <div className="space-y-2">
               {args.map((arg, index) => (
                 <div key={index} className="flex gap-2">
@@ -186,14 +208,16 @@ export function ServerModal({ isOpen, onClose, onSave, serverName = '', server }
                   <input
                     type="text"
                     value={envVar.key}
-                    onChange={(e) => updateEnvVar(index, 'key', e.target.value)}
+                    onChange={(e) => updateEnvVar(index, "key", e.target.value)}
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                     placeholder="Key"
                   />
                   <input
                     type="text"
                     value={envVar.value}
-                    onChange={(e) => updateEnvVar(index, 'value', e.target.value)}
+                    onChange={(e) =>
+                      updateEnvVar(index, "value", e.target.value)
+                    }
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                     placeholder="Value"
                   />

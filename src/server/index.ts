@@ -1,10 +1,11 @@
-import express, { Application, Request, Response, NextFunction } from 'express';
-import cors from 'cors';
-import bodyParser from 'body-parser';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import configRoutes from './routes/config.js';
-import presetsRoutes from './routes/presets.js';
+import express, { Application, Request, Response, NextFunction } from "express";
+import cors from "cors";
+import bodyParser from "body-parser";
+import rateLimit from "express-rate-limit";
+import path from "path";
+import { fileURLToPath } from "url";
+import configRoutes from "./routes/config.js";
+import presetsRoutes from "./routes/presets.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,21 +17,50 @@ export function createApp(): Application {
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: true }));
 
-  app.use('/api', configRoutes);
-  app.use('/api', presetsRoutes);
+  // Rate limiting for API endpoints
+  const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests per windowMs
+    message: "Too many requests from this IP, please try again later.",
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
 
-  const clientPath = path.join(__dirname, '../client');
+  // Stricter rate limiting for write operations
+  const writeLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 20, // Limit each IP to 20 write requests per windowMs
+    message: "Too many write requests from this IP, please try again later.",
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+
+  // Rate limiting for static files and HTML
+  const staticLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 500, // Limit each IP to 500 static requests per windowMs
+    message: "Too many requests from this IP, please try again later.",
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+
+  app.use("/api", apiLimiter);
+  app.use("/api/config", writeLimiter);
+  app.use("/api", configRoutes);
+  app.use("/api", presetsRoutes);
+
+  const clientPath = path.join(__dirname, "../client");
   app.use(express.static(clientPath));
 
-  app.get('*', (_req: Request, res: Response) => {
-    res.sendFile(path.join(clientPath, 'index.html'));
+  app.get("*", staticLimiter, (_req: Request, res: Response) => {
+    res.sendFile(path.join(clientPath, "index.html"));
   });
 
   app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
-    console.error('Server error:', err);
+    console.error("Server error:", err);
     res.status(500).json({
       success: false,
-      message: 'Internal server error',
+      message: "Internal server error",
       error: err.message,
     });
   });
@@ -47,28 +77,28 @@ export async function startServer(port: number = 3000): Promise<void> {
       resolve();
     });
 
-    server.on('error', (error: NodeJS.ErrnoException) => {
-      if (error.code === 'EADDRINUSE') {
+    server.on("error", (error: NodeJS.ErrnoException) => {
+      if (error.code === "EADDRINUSE") {
         console.error(`Port ${port} is already in use`);
         reject(new Error(`Port ${port} is already in use`));
       } else {
-        console.error('Server error:', error);
+        console.error("Server error:", error);
         reject(error);
       }
     });
 
-    process.on('SIGTERM', () => {
-      console.log('SIGTERM received, shutting down gracefully');
+    process.on("SIGTERM", () => {
+      console.log("SIGTERM received, shutting down gracefully");
       server.close(() => {
-        console.log('Server closed');
+        console.log("Server closed");
         process.exit(0);
       });
     });
 
-    process.on('SIGINT', () => {
-      console.log('\nSIGINT received, shutting down gracefully');
+    process.on("SIGINT", () => {
+      console.log("\nSIGINT received, shutting down gracefully");
       server.close(() => {
-        console.log('Server closed');
+        console.log("Server closed");
         process.exit(0);
       });
     });
@@ -76,6 +106,6 @@ export async function startServer(port: number = 3000): Promise<void> {
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const port = parseInt(process.env.PORT || '3000', 10);
+  const port = parseInt(process.env.PORT || "3000", 10);
   startServer(port).catch(console.error);
 }
