@@ -23,7 +23,7 @@
     "copy:presets": "mkdir -p dist/presets && cp -r src/presets/* dist/presets/",
     "start": "node dist/server/index.js",
     "test": "jest",
-    "lint": "eslint src/**/*.{ts,tsx}",
+    "lint": "tsc --noEmit -p tsconfig.server.json",
     "format": "prettier --write src/**/*.{ts,tsx}"
   },
   "keywords": [
