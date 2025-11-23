@@ -1,7 +1,12 @@
-import type { MCPConfig, ValidationResult } from '../types/index.js';
-import { getConfigPath, getBackupPath } from '../utils/paths.js';
-import { fileExists, readJsonFile, writeJsonFile, copyFile } from '../utils/fileSystem.js';
-import { Validator } from './validator.js';
+import type { MCPConfig, ValidationResult } from "../types/index.js";
+import { getConfigPath, getBackupPath } from "../utils/paths.js";
+import {
+  fileExists,
+  readJsonFile,
+  writeJsonFile,
+  copyFile,
+} from "../utils/fileSystem.js";
+import { Validator } from "./validator.js";
 
 export class ConfigManager {
   private validator: Validator;
@@ -29,7 +34,7 @@ export class ConfigManager {
   async saveConfig(config: MCPConfig): Promise<void> {
     const validationResult = this.validateConfig(config);
     if (!validationResult.valid) {
-      throw new Error(`Invalid config: ${validationResult.errors.join(', ')}`);
+      throw new Error(`Invalid config: ${validationResult.errors.join(", ")}`);
     }
 
     const configPath = getConfigPath();
@@ -51,7 +56,7 @@ export class ConfigManager {
     const exists = await fileExists(configPath);
 
     if (!exists) {
-      throw new Error('Config file does not exist, cannot backup');
+      throw new Error("Config file does not exist, cannot backup");
     }
 
     const backupPath = getBackupPath();

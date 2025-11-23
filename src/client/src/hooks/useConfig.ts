@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
-import { api } from '../services/api';
-import type { MCPConfig } from '../types';
+import { useState, useEffect, useCallback } from "react";
+import { api } from "../services/api";
+import type { MCPConfig } from "../types";
 
 export function useConfig() {
   const [config, setConfig] = useState<MCPConfig | null>(null);
@@ -15,7 +15,7 @@ export function useConfig() {
       setConfig(data);
     } catch (err) {
       setError((err as Error).message);
-      console.error('Failed to load config:', err);
+      console.error("Failed to load config:", err);
     } finally {
       setLoading(false);
     }
@@ -29,13 +29,13 @@ export function useConfig() {
       return true;
     } catch (err) {
       setError((err as Error).message);
-      console.error('Failed to save config:', err);
+      console.error("Failed to save config:", err);
       return false;
     }
   }, []);
 
   const updateServer = useCallback(
-    (serverName: string, serverConfig: MCPConfig['mcpServers'][string]) => {
+    (serverName: string, serverConfig: MCPConfig["mcpServers"][string]) => {
       if (!config) return;
 
       const newConfig = {
@@ -48,7 +48,7 @@ export function useConfig() {
 
       setConfig(newConfig);
     },
-    [config]
+    [config],
   );
 
   const deleteServer = useCallback(
@@ -64,7 +64,7 @@ export function useConfig() {
 
       setConfig(newConfig);
     },
-    [config]
+    [config],
   );
 
   useEffect(() => {

@@ -1,19 +1,30 @@
-import { useState, useEffect } from 'react';
-import { Header } from './components/Header';
-import { ServerCard } from './components/ServerCard';
-import { ServerModal } from './components/ServerModal';
-import { PresetModal } from './components/PresetModal';
-import { ToastContainer } from './components/Toast';
-import { useConfig } from './hooks/useConfig';
-import { api } from './services/api';
-import type { MCPServer, Preset, Toast } from './types';
+import { useState, useEffect } from "react";
+import { Header } from "./components/Header";
+import { ServerCard } from "./components/ServerCard";
+import { ServerModal } from "./components/ServerModal";
+import { PresetModal } from "./components/PresetModal";
+import { ToastContainer } from "./components/Toast";
+import { useConfig } from "./hooks/useConfig";
+import { api } from "./services/api";
+import type { MCPServer, Preset, Toast } from "./types";
 
 function App() {
-  const { config, loading, error, loadConfig, saveConfig, updateServer, deleteServer } = useConfig();
-  const [configPath, setConfigPath] = useState('');
+  const {
+    config,
+    loading,
+    error,
+    loadConfig,
+    saveConfig,
+    updateServer,
+    deleteServer,
+  } = useConfig();
+  const [configPath, setConfigPath] = useState("");
   const [isServerModalOpen, setIsServerModalOpen] = useState(false);
   const [isPresetModalOpen, setIsPresetModalOpen] = useState(false);
-  const [editingServer, setEditingServer] = useState<{ name: string; server: MCPServer } | null>(null);
+  const [editingServer, setEditingServer] = useState<{
+    name: string;
+    server: MCPServer;
+  } | null>(null);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
@@ -23,7 +34,7 @@ function App() {
     });
   }, []);
 
-  const addToast = (type: Toast['type'], message: string) => {
+  const addToast = (type: Toast["type"], message: string) => {
     const id = Date.now().toString();
     setToasts((prev) => [...prev, { id, type, message }]);
   };
@@ -39,7 +50,10 @@ function App() {
 
   const handleEditServer = (serverName: string) => {
     if (config) {
-      setEditingServer({ name: serverName, server: config.mcpServers[serverName] });
+      setEditingServer({
+        name: serverName,
+        server: config.mcpServers[serverName],
+      });
       setIsServerModalOpen(true);
     }
   };
@@ -48,7 +62,7 @@ function App() {
     if (window.confirm(`Are you sure you want to delete "${serverName}"?`)) {
       deleteServer(serverName);
       setHasUnsavedChanges(true);
-      addToast('success', `Server "${serverName}" deleted`);
+      addToast("success", `Server "${serverName}" deleted`);
     }
   };
 
@@ -63,7 +77,10 @@ function App() {
   const handleSaveServer = (serverName: string, server: MCPServer) => {
     updateServer(serverName, server);
     setHasUnsavedChanges(true);
-    addToast('success', `Server "${serverName}" ${editingServer ? 'updated' : 'added'}`);
+    addToast(
+      "success",
+      `Server "${serverName}" ${editingServer ? "updated" : "added"}`,
+    );
   };
 
   const handleSaveConfig = async () => {
@@ -71,39 +88,39 @@ function App() {
       const success = await saveConfig(config);
       if (success) {
         setHasUnsavedChanges(false);
-        addToast('success', 'Configuration saved successfully');
+        addToast("success", "Configuration saved successfully");
       } else {
-        addToast('error', 'Failed to save configuration');
+        addToast("error", "Failed to save configuration");
       }
     }
   };
 
   const handleDiscardChanges = () => {
-    if (window.confirm('Are you sure you want to discard all changes?')) {
+    if (window.confirm("Are you sure you want to discard all changes?")) {
       loadConfig();
       setHasUnsavedChanges(false);
-      addToast('info', 'Changes discarded');
+      addToast("info", "Changes discarded");
     }
   };
 
   const handleExport = () => {
     if (config) {
       const dataStr = JSON.stringify(config, null, 2);
-      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const dataBlob = new Blob([dataStr], { type: "application/json" });
       const url = URL.createObjectURL(dataBlob);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
-      link.download = 'claude_desktop_config.json';
+      link.download = "claude_desktop_config.json";
       link.click();
       URL.revokeObjectURL(url);
-      addToast('success', 'Configuration exported');
+      addToast("success", "Configuration exported");
     }
   };
 
   const handleImport = () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'application/json';
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "application/json";
     input.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) {
@@ -115,15 +132,18 @@ function App() {
             if (validationResult.valid) {
               const success = await saveConfig(imported);
               if (success) {
-                addToast('success', 'Configuration imported successfully');
+                addToast("success", "Configuration imported successfully");
               } else {
-                addToast('error', 'Failed to import configuration');
+                addToast("error", "Failed to import configuration");
               }
             } else {
-              addToast('error', `Invalid configuration: ${validationResult.errors.join(', ')}`);
+              addToast(
+                "error",
+                `Invalid configuration: ${validationResult.errors.join(", ")}`,
+              );
             }
           } catch (err) {
-            addToast('error', 'Failed to parse imported file');
+            addToast("error", "Failed to parse imported file");
           }
         };
         reader.readAsText(file);
@@ -196,7 +216,9 @@ function App() {
           {servers.length === 0 ? (
             <div className="text-center py-12 text-gray-500">
               <p className="text-lg mb-4">No MCP servers configured</p>
-              <p className="text-sm">Click "Add Server" or "Add from Preset" to get started</p>
+              <p className="text-sm">
+                Click "Add Server" or "Add from Preset" to get started
+              </p>
             </div>
           ) : (
             <div className="space-y-4">

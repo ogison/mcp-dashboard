@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import type { Toast as ToastType } from '../types';
+import { useEffect } from "react";
+import type { Toast as ToastType } from "../types";
 
 interface ToastProps {
   toast: ToastType;
@@ -16,10 +16,10 @@ export function Toast({ toast, onClose }: ToastProps) {
   }, [toast.id, onClose]);
 
   const bgColor = {
-    success: 'bg-success',
-    error: 'bg-error',
-    warning: 'bg-warning',
-    info: 'bg-primary',
+    success: "bg-success",
+    error: "bg-error",
+    warning: "bg-warning",
+    info: "bg-primary",
   }[toast.type];
 
   return (

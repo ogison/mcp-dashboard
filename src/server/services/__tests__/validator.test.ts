@@ -1,20 +1,20 @@
-import { Validator } from '../validator.js';
-import type { MCPConfig, MCPServer } from '../../types/index.js';
+import { Validator } from "../validator.js";
+import type { MCPConfig, MCPServer } from "../../types/index.js";
 
-describe('Validator', () => {
+describe("Validator", () => {
   let validator: Validator;
 
   beforeEach(() => {
     validator = new Validator();
   });
 
-  describe('validateMCPConfig', () => {
-    test('should validate a valid config', () => {
+  describe("validateMCPConfig", () => {
+    test("should validate a valid config", () => {
       const config: MCPConfig = {
         mcpServers: {
-          'test-server': {
-            command: 'npx',
-            args: ['-y', '@modelcontextprotocol/server-filesystem'],
+          "test-server": {
+            command: "npx",
+            args: ["-y", "@modelcontextprotocol/server-filesystem"],
           },
         },
       };
@@ -24,39 +24,39 @@ describe('Validator', () => {
       expect(result.errors).toHaveLength(0);
     });
 
-    test('should reject null config', () => {
+    test("should reject null config", () => {
       const result = validator.validateMCPConfig(null as any);
       expect(result.valid).toBe(false);
-      expect(result.errors).toContain('Config is null or undefined');
+      expect(result.errors).toContain("Config is null or undefined");
     });
 
-    test('should reject config without mcpServers', () => {
+    test("should reject config without mcpServers", () => {
       const config = {} as MCPConfig;
       const result = validator.validateMCPConfig(config);
       expect(result.valid).toBe(false);
-      expect(result.errors).toContain('mcpServers field is required');
+      expect(result.errors).toContain("mcpServers field is required");
     });
 
-    test('should reject config with non-object mcpServers', () => {
-      const config = { mcpServers: 'invalid' } as any;
+    test("should reject config with non-object mcpServers", () => {
+      const config = { mcpServers: "invalid" } as any;
       const result = validator.validateMCPConfig(config);
       expect(result.valid).toBe(false);
-      expect(result.errors).toContain('mcpServers must be an object');
+      expect(result.errors).toContain("mcpServers must be an object");
     });
 
-    test('should validate config with empty mcpServers', () => {
+    test("should validate config with empty mcpServers", () => {
       const config: MCPConfig = { mcpServers: {} };
       const result = validator.validateMCPConfig(config);
       expect(result.valid).toBe(true);
       expect(result.errors).toHaveLength(0);
     });
 
-    test('should validate config with disabled server', () => {
+    test("should validate config with disabled server", () => {
       const config: MCPConfig = {
         mcpServers: {
-          'disabled-server': {
-            command: 'npx',
-            args: ['-y', 'test'],
+          "disabled-server": {
+            command: "npx",
+            args: ["-y", "test"],
             disabled: true,
           },
         },
@@ -67,11 +67,11 @@ describe('Validator', () => {
     });
   });
 
-  describe('validateServerConfig', () => {
-    test('should validate a valid server config', () => {
+  describe("validateServerConfig", () => {
+    test("should validate a valid server config", () => {
       const server: MCPServer = {
-        command: 'npx',
-        args: ['-y', '@modelcontextprotocol/server-filesystem'],
+        command: "npx",
+        args: ["-y", "@modelcontextprotocol/server-filesystem"],
       };
 
       const result = validator.validateServerConfig(server);
@@ -79,20 +79,22 @@ describe('Validator', () => {
       expect(result.errors).toHaveLength(0);
     });
 
-    test('should reject server with empty command', () => {
+    test("should reject server with empty command", () => {
       const server: MCPServer = {
-        command: '',
+        command: "",
         args: [],
       };
 
       const result = validator.validateServerConfig(server);
       expect(result.valid).toBe(false);
-      expect(result.errors.some(e => e.includes('Command is required'))).toBe(true);
+      expect(result.errors.some((e) => e.includes("Command is required"))).toBe(
+        true,
+      );
     });
 
-    test('should reject server with whitespace-only command', () => {
+    test("should reject server with whitespace-only command", () => {
       const server: MCPServer = {
-        command: '   ',
+        command: "   ",
         args: [],
       };
 
@@ -100,35 +102,39 @@ describe('Validator', () => {
       expect(result.valid).toBe(false);
     });
 
-    test('should reject server with non-string args', () => {
+    test("should reject server with non-string args", () => {
       const server: MCPServer = {
-        command: 'npx',
-        args: ['valid', 123 as any, 'valid'],
+        command: "npx",
+        args: ["valid", 123 as any, "valid"],
       };
 
       const result = validator.validateServerConfig(server);
       expect(result.valid).toBe(false);
-      expect(result.errors.some(e => e.includes('must be a string'))).toBe(true);
+      expect(result.errors.some((e) => e.includes("must be a string"))).toBe(
+        true,
+      );
     });
 
-    test('should reject server with non-array args', () => {
+    test("should reject server with non-array args", () => {
       const server: MCPServer = {
-        command: 'npx',
-        args: 'invalid' as any,
+        command: "npx",
+        args: "invalid" as any,
       };
 
       const result = validator.validateServerConfig(server);
       expect(result.valid).toBe(false);
-      expect(result.errors.some(e => e.includes('must be an array'))).toBe(true);
+      expect(result.errors.some((e) => e.includes("must be an array"))).toBe(
+        true,
+      );
     });
 
-    test('should validate server with env vars', () => {
+    test("should validate server with env vars", () => {
       const server: MCPServer = {
-        command: 'npx',
-        args: ['-y', 'test'],
+        command: "npx",
+        args: ["-y", "test"],
         env: {
-          API_KEY: 'test-key',
-          DEBUG: 'true',
+          API_KEY: "test-key",
+          DEBUG: "true",
         },
       };
 
@@ -136,63 +142,65 @@ describe('Validator', () => {
       expect(result.valid).toBe(true);
     });
 
-    test('should reject server with invalid disabled field', () => {
+    test("should reject server with invalid disabled field", () => {
       const server: MCPServer = {
-        command: 'npx',
+        command: "npx",
         args: [],
-        disabled: 'yes' as any,
+        disabled: "yes" as any,
       };
 
       const result = validator.validateServerConfig(server);
       expect(result.valid).toBe(false);
-      expect(result.errors.some(e => e.includes('Disabled must be a boolean'))).toBe(true);
+      expect(
+        result.errors.some((e) => e.includes("Disabled must be a boolean")),
+      ).toBe(true);
     });
 
-    test('should include server name in error messages', () => {
+    test("should include server name in error messages", () => {
       const server: MCPServer = {
-        command: '',
+        command: "",
         args: [],
       };
 
-      const result = validator.validateServerConfig(server, 'my-server');
-      expect(result.errors.some(e => e.includes('my-server'))).toBe(true);
+      const result = validator.validateServerConfig(server, "my-server");
+      expect(result.errors.some((e) => e.includes("my-server"))).toBe(true);
     });
   });
 
-  describe('validateCommand', () => {
-    test('should validate valid commands', () => {
-      expect(validator.validateCommand('npx')).toBe(true);
-      expect(validator.validateCommand('node')).toBe(true);
-      expect(validator.validateCommand('/usr/bin/python3')).toBe(true);
+  describe("validateCommand", () => {
+    test("should validate valid commands", () => {
+      expect(validator.validateCommand("npx")).toBe(true);
+      expect(validator.validateCommand("node")).toBe(true);
+      expect(validator.validateCommand("/usr/bin/python3")).toBe(true);
     });
 
-    test('should reject empty or whitespace commands', () => {
-      expect(validator.validateCommand('')).toBe(false);
-      expect(validator.validateCommand('   ')).toBe(false);
+    test("should reject empty or whitespace commands", () => {
+      expect(validator.validateCommand("")).toBe(false);
+      expect(validator.validateCommand("   ")).toBe(false);
     });
 
-    test('should reject null or undefined', () => {
+    test("should reject null or undefined", () => {
       expect(validator.validateCommand(null as any)).toBe(false);
       expect(validator.validateCommand(undefined as any)).toBe(false);
     });
 
-    test('should reject commands with dangerous patterns', () => {
-      expect(validator.validateCommand('command; rm -rf /')).toBe(false);
-      expect(validator.validateCommand('command && malicious')).toBe(false);
-      expect(validator.validateCommand('command | grep')).toBe(false);
-      expect(validator.validateCommand('command `whoami`')).toBe(false);
-      expect(validator.validateCommand('$(malicious)')).toBe(false);
-      expect(validator.validateCommand('../../../etc/passwd')).toBe(false);
-      expect(validator.validateCommand('~/sensitive')).toBe(false);
+    test("should reject commands with dangerous patterns", () => {
+      expect(validator.validateCommand("command; rm -rf /")).toBe(false);
+      expect(validator.validateCommand("command && malicious")).toBe(false);
+      expect(validator.validateCommand("command | grep")).toBe(false);
+      expect(validator.validateCommand("command `whoami`")).toBe(false);
+      expect(validator.validateCommand("$(malicious)")).toBe(false);
+      expect(validator.validateCommand("../../../etc/passwd")).toBe(false);
+      expect(validator.validateCommand("~/sensitive")).toBe(false);
     });
   });
 
-  describe('validateEnvVars', () => {
-    test('should validate valid env vars', () => {
+  describe("validateEnvVars", () => {
+    test("should validate valid env vars", () => {
       const env = {
-        API_KEY: 'test-key',
-        PORT: '3000',
-        DEBUG: 'true',
+        API_KEY: "test-key",
+        PORT: "3000",
+        DEBUG: "true",
       };
 
       const result = validator.validateEnvVars(env);
@@ -200,40 +208,44 @@ describe('Validator', () => {
       expect(result.errors).toHaveLength(0);
     });
 
-    test('should validate empty env vars', () => {
+    test("should validate empty env vars", () => {
       const result = validator.validateEnvVars({});
       expect(result.valid).toBe(true);
     });
 
-    test('should reject null env vars', () => {
+    test("should reject null env vars", () => {
       const result = validator.validateEnvVars(null as any);
       expect(result.valid).toBe(false);
-      expect(result.errors.some(e => e.includes('must be an object'))).toBe(true);
+      expect(result.errors.some((e) => e.includes("must be an object"))).toBe(
+        true,
+      );
     });
 
-    test('should reject env vars with non-string values', () => {
+    test("should reject env vars with non-string values", () => {
       const env = {
-        API_KEY: 'valid',
+        API_KEY: "valid",
         PORT: 3000 as any,
       };
 
       const result = validator.validateEnvVars(env);
       expect(result.valid).toBe(false);
-      expect(result.errors.some(e => e.includes('must be a string'))).toBe(true);
+      expect(result.errors.some((e) => e.includes("must be a string"))).toBe(
+        true,
+      );
     });
 
-    test('should reject env vars with empty keys', () => {
+    test("should reject env vars with empty keys", () => {
       const env = {
-        '': 'value',
+        "": "value",
       };
 
       const result = validator.validateEnvVars(env);
       expect(result.valid).toBe(false);
     });
 
-    test('should include server name in error messages', () => {
-      const result = validator.validateEnvVars(null as any, 'test-server');
-      expect(result.errors.some(e => e.includes('test-server'))).toBe(true);
+    test("should include server name in error messages", () => {
+      const result = validator.validateEnvVars(null as any, "test-server");
+      expect(result.errors.some((e) => e.includes("test-server"))).toBe(true);
     });
   });
 });

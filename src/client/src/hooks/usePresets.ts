@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
-import { api } from '../services/api';
-import type { Preset } from '../types';
+import { useState, useEffect, useCallback } from "react";
+import { api } from "../services/api";
+import type { Preset } from "../types";
 
 export function usePresets() {
   const [presets, setPresets] = useState<Preset[]>([]);
@@ -15,27 +15,30 @@ export function usePresets() {
       setPresets(data.presets);
     } catch (err) {
       setError((err as Error).message);
-      console.error('Failed to load presets:', err);
+      console.error("Failed to load presets:", err);
     } finally {
       setLoading(false);
     }
   }, []);
 
-  const searchPresets = useCallback(async (query: string) => {
-    if (!query.trim()) {
-      await loadPresets();
-      return;
-    }
+  const searchPresets = useCallback(
+    async (query: string) => {
+      if (!query.trim()) {
+        await loadPresets();
+        return;
+      }
 
-    try {
-      setError(null);
-      const data = await api.searchPresets(query);
-      setPresets(data.presets);
-    } catch (err) {
-      setError((err as Error).message);
-      console.error('Failed to search presets:', err);
-    }
-  }, [loadPresets]);
+      try {
+        setError(null);
+        const data = await api.searchPresets(query);
+        setPresets(data.presets);
+      } catch (err) {
+        setError((err as Error).message);
+        console.error("Failed to search presets:", err);
+      }
+    },
+    [loadPresets],
+  );
 
   useEffect(() => {
     loadPresets();

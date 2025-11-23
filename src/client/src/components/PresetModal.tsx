@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import type { Preset } from '../types';
-import { usePresets } from '../hooks/usePresets';
+import { useState } from "react";
+import type { Preset } from "../types";
+import { usePresets } from "../hooks/usePresets";
 
 interface PresetModalProps {
   isOpen: boolean;
@@ -10,7 +10,7 @@ interface PresetModalProps {
 
 export function PresetModal({ isOpen, onClose, onSelect }: PresetModalProps) {
   const { presets, loading, searchPresets } = usePresets();
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -20,7 +20,7 @@ export function PresetModal({ isOpen, onClose, onSelect }: PresetModalProps) {
   const handleSelect = (preset: Preset) => {
     onSelect(preset);
     onClose();
-    setSearchQuery('');
+    setSearchQuery("");
   };
 
   if (!isOpen) return null;
@@ -50,9 +50,13 @@ export function PresetModal({ isOpen, onClose, onSelect }: PresetModalProps) {
 
         <div className="flex-1 overflow-y-auto p-6">
           {loading ? (
-            <div className="text-center py-8 text-gray-500">Loading presets...</div>
+            <div className="text-center py-8 text-gray-500">
+              Loading presets...
+            </div>
           ) : presets.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">No presets found</div>
+            <div className="text-center py-8 text-gray-500">
+              No presets found
+            </div>
           ) : (
             <div className="space-y-3">
               {presets.map((preset) => (
@@ -63,7 +67,9 @@ export function PresetModal({ isOpen, onClose, onSelect }: PresetModalProps) {
                 >
                   <div className="flex items-start justify-between mb-2">
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-900">{preset.name}</h3>
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        {preset.name}
+                      </h3>
                       <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
                         {preset.category}
                       </span>
@@ -78,16 +84,22 @@ export function PresetModal({ isOpen, onClose, onSelect }: PresetModalProps) {
                       Add
                     </button>
                   </div>
-                  <p className="text-sm text-gray-600 mb-2">{preset.description}</p>
+                  <p className="text-sm text-gray-600 mb-2">
+                    {preset.description}
+                  </p>
                   <div className="text-xs font-mono bg-gray-50 p-2 rounded">
                     <div>
-                      <span className="text-gray-600">Command:</span>{' '}
-                      <span className="text-gray-900">{preset.config.command}</span>
+                      <span className="text-gray-600">Command:</span>{" "}
+                      <span className="text-gray-900">
+                        {preset.config.command}
+                      </span>
                     </div>
                     {preset.config.args && preset.config.args.length > 0 && (
                       <div className="mt-1">
-                        <span className="text-gray-600">Args:</span>{' '}
-                        <span className="text-gray-900">{preset.config.args.join(' ')}</span>
+                        <span className="text-gray-600">Args:</span>{" "}
+                        <span className="text-gray-900">
+                          {preset.config.args.join(" ")}
+                        </span>
                       </div>
                     )}
                   </div>

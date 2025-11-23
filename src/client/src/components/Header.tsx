@@ -5,7 +5,12 @@ interface HeaderProps {
   onImport: () => void;
 }
 
-export function Header({ configPath, onReload, onExport, onImport }: HeaderProps) {
+export function Header({
+  configPath,
+  onReload,
+  onExport,
+  onImport,
+}: HeaderProps) {
   return (
     <div className="bg-white shadow-sm border-b border-gray-200 p-6">
       <div className="max-w-7xl mx-auto">
