@@ -136,7 +136,7 @@ Click the checkbox next to the server name to toggle enabled/disabled state.
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/mcp-dashboard.git
+git clone https://github.com/ogison/mcp-dashboard.git
 cd mcp-dashboard
 
 # Install dependencies
@@ -244,4 +244,4 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## Support
 
 For issues and feature requests, please visit:
-https://github.com/yourusername/mcp-dashboard/issues
+https://github.com/ogison/mcp-dashboard/issues
