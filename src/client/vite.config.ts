@@ -6,10 +6,10 @@ export default defineConfig({
   plugins: [react()],
   publicDir: path.resolve(__dirname, "../images"),
   server: {
-    port: 5173,
+    port: 62000,
     proxy: {
       "/api": {
-        target: "http://localhost:3000",
+        target: "http://localhost:65432",
         changeOrigin: true,
       },
     },

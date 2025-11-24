@@ -23,7 +23,7 @@ This is a **full-stack TypeScript application** with a client-server architectur
 ```
 CLI (bin/cli.js)
     ↓ starts server + opens browser
-Express Server (localhost:3000)
+Express Server (localhost:65432)
     ├─→ API Routes (/api/config, /api/presets)
     ├─→ Services Layer (configManager, validator, presetManager)
     ├─→ File System (reads/writes claude_desktop_config.json)
@@ -54,8 +54,8 @@ Express Server (localhost:3000)
 ```bash
 # Start both server and client with hot reload
 npm run dev
-# Server runs on :3000, Vite dev server on :5173
-# In dev mode, API requests from :5173 are proxied to :3000
+# Server runs on :65432, Vite dev server on :62000
+# In dev mode, API requests from :62000 are proxied to :65432
 
 # Run separately if needed
 npm run dev:server  # Backend only (tsx watch)
@@ -90,7 +90,7 @@ npm run format  # Prettier formatting
 ```bash
 npm start                     # Start production server
 npx mcp-dashboard              # Run as CLI tool
-mcp-dashboard -p 3001          # Custom port
+mcp-dashboard -p 62000         # Custom port
 mcp-dashboard --no-open        # Don't auto-open browser
 ```
 
@@ -256,14 +256,14 @@ The build is split into three independent steps:
 ### Development vs Production
 
 **Development Mode** (`npm run dev`):
-- Server: tsx watch (TypeScript execution + hot reload)
-- Client: Vite dev server (:5173) with HMR
-- API proxy: Vite proxies `/api/*` to `localhost:3000`
+- Server: tsx watch (TypeScript execution + hot reload) on :65432
+- Client: Vite dev server (:62000) with HMR
+- API proxy: Vite proxies `/api/*` to `localhost:65432`
 
 **Production Mode** (`npm start`):
 - Server: Compiled JS from `dist/server/`
 - Client: Pre-bundled files from `dist/client/`
-- Single server on port 3000 serves both API and static files
+- Single server on port 65432 serves both API and static files
 
 ---
 
@@ -345,7 +345,7 @@ const serverSchema = z.object({
 
 ### Port Already in Use
 ```bash
-mcp-dashboard -p 3001
+mcp-dashboard -p 62000
 ```
 
 ### Config File Not Found
@@ -379,9 +379,9 @@ Commit message style: Clear, descriptive, focus on "why" not "what"
 ## Quick Reference
 
 ### Ports
-- Production: 3000 (configurable)
-- Dev server: 3000
-- Dev client (Vite): 5173
+- Production: 65432 (configurable)
+- Dev server: 65432
+- Dev client (Vite): 62000
 
 ### Important Paths
 - Server entry: `src/server/index.ts`

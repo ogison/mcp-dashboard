@@ -199,7 +199,7 @@ describe("Validator", () => {
     test("should validate valid env vars", () => {
       const env = {
         API_KEY: "test-key",
-        PORT: "3000",
+        PORT: "65432",
         DEBUG: "true",
       };
 
@@ -224,7 +224,7 @@ describe("Validator", () => {
     test("should reject env vars with non-string values", () => {
       const env = {
         API_KEY: "valid",
-        PORT: 3000 as any,
+        PORT: 65432 as any,
       };
 
       const result = validator.validateEnvVars(env);

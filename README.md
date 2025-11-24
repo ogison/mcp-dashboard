@@ -41,7 +41,7 @@ npx mcp-dashboard
 ```
 
 This will:
-1. Start a local web server (default port: 3000)
+1. Start a local web server (default port: 65432)
 2. Automatically open your default browser
 3. Load your current MCP configuration
 
@@ -51,7 +51,7 @@ This will:
 mcp-dashboard [options]
 
 Options:
-  -p, --port <port>  Port number (default: 3000)
+  -p, --port <port>  Port number (default: 65432)
   --no-open          Do not open browser automatically
   -h, --help         Display help
   -V, --version      Display version
@@ -213,10 +213,10 @@ mcp-dashboard/
 
 ### Port Already in Use
 
-If port 3000 is already in use:
+If port 65432 is already in use:
 
 ```bash
-mcp-dashboard -p 3001
+mcp-dashboard -p 62000
 ```
 
 ### Browser Doesn't Open
@@ -227,7 +227,7 @@ If the browser doesn't open automatically:
 mcp-dashboard --no-open
 ```
 
-Then manually open: `http://localhost:3000`
+Then manually open: `http://localhost:65432`
 
 ### Configuration Not Found
 
