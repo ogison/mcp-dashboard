@@ -41,7 +41,8 @@ npx mcp-dashboard
 ```
 
 This will:
-1. Start a local web server (default port: 65432)
+
+1. Start a local web server (default port: 4000)
 2. Automatically open your default browser
 3. Load your current MCP configuration
 
@@ -51,7 +52,7 @@ This will:
 mcp-dashboard [options]
 
 Options:
-  -p, --port <port>  Port number (default: 65432)
+  -p, --port <port>  Port number (default: 4000)
   --no-open          Do not open browser automatically
   -h, --help         Display help
   -V, --version      Display version
@@ -64,11 +65,13 @@ The tool automatically detects and prioritizes configuration files in the follow
 #### Claude Code (Recommended)
 
 **Project Scope** (`.mcp.json` in project directory):
+
 - Searched upward from current directory to home directory
 - Ideal for team-shared, version-controlled configurations
 - Priority: **Highest**
 
 **User Scope** (`~/.claude.json`):
+
 - All platforms: `~/.claude.json` in home directory
 - Personal settings shared across all projects
 - May contain additional Claude Code settings (theme, projects, etc.)
@@ -77,6 +80,7 @@ The tool automatically detects and prioritizes configuration files in the follow
 #### Claude Desktop (Legacy Support)
 
 **Claude Desktop Config**:
+
 - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
 - **Windows**: `%APPDATA%/Claude/claude_desktop_config.json`
 - **Linux**: `~/.config/Claude/claude_desktop_config.json`
@@ -186,11 +190,13 @@ mcp-dashboard/
 ### Tech Stack
 
 **Backend:**
+
 - Node.js + TypeScript
 - Express
 - CORS, Body Parser
 
 **Frontend:**
+
 - React 18
 - Vite
 - TailwindCSS
@@ -198,6 +204,7 @@ mcp-dashboard/
 - Zod (validation)
 
 **CLI:**
+
 - Commander (CLI framework)
 - Chalk (colored output)
 - Open (browser launcher)
@@ -213,7 +220,7 @@ mcp-dashboard/
 
 ### Port Already in Use
 
-If port 65432 is already in use:
+If port 4000 is already in use:
 
 ```bash
 mcp-dashboard -p 62000
@@ -227,7 +234,7 @@ If the browser doesn't open automatically:
 mcp-dashboard --no-open
 ```
 
-Then manually open: `http://localhost:65432`
+Then manually open: `http://localhost:4000`
 
 ### Configuration Not Found
 
