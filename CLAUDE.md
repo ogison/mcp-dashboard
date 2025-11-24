@@ -23,7 +23,7 @@ This is a **full-stack TypeScript application** with a client-server architectur
 ```
 CLI (bin/cli.js)
     ↓ starts server + opens browser
-Express Server (localhost:65432)
+Express Server (localhost:4000)
     ├─→ API Routes (/api/config, /api/presets)
     ├─→ Services Layer (configManager, validator, presetManager)
     ├─→ File System (reads/writes claude_desktop_config.json)
@@ -34,6 +34,7 @@ Express Server (localhost:65432)
 ```
 
 **Key Design Decisions:**
+
 - **Service Layer Separation**: Business logic isolated from HTTP handlers for testability and reusability
 - **Multiple TypeScript Configs**: Server, client, and CLI have different compilation targets and module resolution needs
 - **Rate Limiting**: Three-tier protection (API: 100/15min, Write: 20/15min, Static: 500/15min)
@@ -51,11 +52,12 @@ Express Server (localhost:65432)
 ## Essential Commands
 
 ### Development
+
 ```bash
 # Start both server and client with hot reload
 npm run dev
-# Server runs on :65432, Vite dev server on :62000
-# In dev mode, API requests from :62000 are proxied to :65432
+# Server runs on :4000, Vite dev server on :62000
+# In dev mode, API requests from :62000 are proxied to :4000
 
 # Run separately if needed
 npm run dev:server  # Backend only (tsx watch)
@@ -63,6 +65,7 @@ npm run dev:client  # Frontend only (Vite HMR)
 ```
 
 ### Building
+
 ```bash
 npm run build
 # Runs 3 steps:
@@ -72,6 +75,7 @@ npm run build
 ```
 
 ### Testing
+
 ```bash
 npm test                      # Run all tests
 npm test -- --watch           # Watch mode
@@ -81,12 +85,14 @@ npm test -- configManager     # Run specific test file
 ```
 
 ### Code Quality
+
 ```bash
 npm run lint    # TypeScript type check (no emit)
 npm run format  # Prettier formatting
 ```
 
 ### Running Built Version
+
 ```bash
 npm start                     # Start production server
 npx mcp-dashboard              # Run as CLI tool
@@ -104,11 +110,11 @@ mcp-dashboard --no-open        # Don't auto-open browser
 
 ```typescript
 // CORRECT
-import { loadConfig } from './services/configManager.js';
-import type { MCPConfig } from './types/index.js';
+import { loadConfig } from "./services/configManager.js";
+import type { MCPConfig } from "./types/index.js";
 
 // WRONG - will cause module resolution errors
-import { loadConfig } from './services/configManager';
+import { loadConfig } from "./services/configManager";
 ```
 
 This is because TypeScript compiles to ES modules and Node.js requires explicit extensions.
@@ -119,19 +125,19 @@ This is because TypeScript compiles to ES modules and Node.js requires explicit 
 
 ```typescript
 // CORRECT - Gets active config path (respects priority)
-import { getConfigPath } from './utils/paths.js';
+import { getConfigPath } from "./utils/paths.js";
 const configPath = await getConfigPath();
 
 // CORRECT - Gets all config locations with metadata
-import { getConfigLocations } from './utils/paths.js';
+import { getConfigLocations } from "./utils/paths.js";
 const locations = await getConfigLocations();
 
 // CORRECT - Gets active config info (path + scope + displayName)
-import { getActiveConfigLocation } from './utils/paths.js';
+import { getActiveConfigLocation } from "./utils/paths.js";
 const activeConfig = await getActiveConfigLocation();
 
 // WRONG
-const configPath = '~/.config/Claude/claude_desktop_config.json';
+const configPath = "~/.config/Claude/claude_desktop_config.json";
 ```
 
 **Config file search order** (priority: highest to lowest):
@@ -159,10 +165,10 @@ Always use async/await for file operations:
 
 ```typescript
 // CORRECT
-const data = await fs.readFile(path, 'utf-8');
+const data = await fs.readFile(path, "utf-8");
 
 // AVOID (blocks event loop)
-const data = fs.readFileSync(path, 'utf-8');
+const data = fs.readFileSync(path, "utf-8");
 ```
 
 ### React State Updates
@@ -171,7 +177,7 @@ Use functional updates when new state depends on previous state:
 
 ```typescript
 // CORRECT
-setConfig(prev => ({ ...prev, newField: value }));
+setConfig((prev) => ({ ...prev, newField: value }));
 
 // WRONG (may use stale data)
 setConfig({ ...config, newField: value });
@@ -183,36 +189,36 @@ setConfig({ ...config, newField: value });
 
 ### Backend Core
 
-| File | Purpose | When to Modify |
-|------|---------|----------------|
-| `src/server/index.ts` | Express app setup, middleware, route registration | Adding middleware, new routes, server config |
-| `src/server/services/configManager.ts` | Config CRUD operations, backup, validation | Changing load/save logic, backup strategy |
-| `src/server/services/validator.ts` | Zod schemas, security checks | Adding validation rules, security checks |
-| `src/server/utils/paths.ts` | Platform-specific path resolution | Supporting new platforms, config locations |
-| `src/server/routes/config.ts` | Config API endpoints | Adding/modifying config endpoints |
-| `src/server/routes/presets.ts` | Preset API endpoints | Adding/modifying preset endpoints |
+| File                                   | Purpose                                           | When to Modify                               |
+| -------------------------------------- | ------------------------------------------------- | -------------------------------------------- |
+| `src/server/index.ts`                  | Express app setup, middleware, route registration | Adding middleware, new routes, server config |
+| `src/server/services/configManager.ts` | Config CRUD operations, backup, validation        | Changing load/save logic, backup strategy    |
+| `src/server/services/validator.ts`     | Zod schemas, security checks                      | Adding validation rules, security checks     |
+| `src/server/utils/paths.ts`            | Platform-specific path resolution                 | Supporting new platforms, config locations   |
+| `src/server/routes/config.ts`          | Config API endpoints                              | Adding/modifying config endpoints            |
+| `src/server/routes/presets.ts`         | Preset API endpoints                              | Adding/modifying preset endpoints            |
 
 ### Frontend Core
 
-| File | Purpose | When to Modify |
-|------|---------|----------------|
-| `src/client/src/App.tsx` | Main component, global state, import/export | Adding top-level features, state changes |
-| `src/client/src/hooks/useConfig.ts` | Config state management and API calls | Adding config operations |
-| `src/client/src/hooks/usePresets.ts` | Preset state management and API calls | Adding preset operations |
-| `src/client/src/components/ServerModal.tsx` | Add/Edit server form (React Hook Form + Zod) | Changing form fields, validation |
-| `src/client/src/services/api.ts` | HTTP client for backend API | Adding new API calls |
+| File                                        | Purpose                                      | When to Modify                           |
+| ------------------------------------------- | -------------------------------------------- | ---------------------------------------- |
+| `src/client/src/App.tsx`                    | Main component, global state, import/export  | Adding top-level features, state changes |
+| `src/client/src/hooks/useConfig.ts`         | Config state management and API calls        | Adding config operations                 |
+| `src/client/src/hooks/usePresets.ts`        | Preset state management and API calls        | Adding preset operations                 |
+| `src/client/src/components/ServerModal.tsx` | Add/Edit server form (React Hook Form + Zod) | Changing form fields, validation         |
+| `src/client/src/services/api.ts`            | HTTP client for backend API                  | Adding new API calls                     |
 
 ### Configuration
 
-| File | Purpose |
-|------|---------|
-| `tsconfig.json` | Base TypeScript config |
-| `tsconfig.server.json` | Server build (ES2020, Node modules) |
-| `tsconfig.client.json` | Client build (ESNext, React JSX) |
-| `tsconfig.node.json` | CLI utilities (Node environment) |
-| `src/client/vite.config.ts` | Vite bundler config, proxy setup |
-| `jest.config.js` | Jest test configuration (ES modules enabled) |
-| `src/presets/mcpServers.json` | MCP server preset definitions |
+| File                          | Purpose                                      |
+| ----------------------------- | -------------------------------------------- |
+| `tsconfig.json`               | Base TypeScript config                       |
+| `tsconfig.server.json`        | Server build (ES2020, Node modules)          |
+| `tsconfig.client.json`        | Client build (ESNext, React JSX)             |
+| `tsconfig.node.json`          | CLI utilities (Node environment)             |
+| `src/client/vite.config.ts`   | Vite bundler config, proxy setup             |
+| `jest.config.js`              | Jest test configuration (ES modules enabled) |
+| `src/presets/mcpServers.json` | MCP server preset definitions                |
 
 ---
 
@@ -256,14 +262,16 @@ The build is split into three independent steps:
 ### Development vs Production
 
 **Development Mode** (`npm run dev`):
-- Server: tsx watch (TypeScript execution + hot reload) on :65432
+
+- Server: tsx watch (TypeScript execution + hot reload) on :4000
 - Client: Vite dev server (:62000) with HMR
-- API proxy: Vite proxies `/api/*` to `localhost:65432`
+- API proxy: Vite proxies `/api/*` to `localhost:4000`
 
 **Production Mode** (`npm start`):
+
 - Server: Compiled JS from `dist/server/`
 - Client: Pre-bundled files from `dist/client/`
-- Single server on port 65432 serves both API and static files
+- Single server on port 4000 serves both API and static files
 
 ---
 
@@ -272,18 +280,20 @@ The build is split into three independent steps:
 Tests are located in `__tests__/` directories next to source files.
 
 **Focus areas:**
+
 - Service layer logic (not route handlers)
 - Edge cases: empty configs, missing files, invalid input
 - Error handling paths
 - Security validation
 
 **Example structure:**
+
 ```typescript
-describe('ConfigManager', () => {
-  describe('loadConfig', () => {
-    it('should load existing config');
-    it('should create default config if missing');
-    it('should handle file read errors');
+describe("ConfigManager", () => {
+  describe("loadConfig", () => {
+    it("should load existing config");
+    it("should create default config if missing");
+    it("should handle file read errors");
   });
 });
 ```
@@ -303,6 +313,7 @@ describe('ConfigManager', () => {
 ### Adding a New MCP Server Preset
 
 Edit `src/presets/mcpServers.json`:
+
 ```json
 {
   "id": "my-server",
@@ -320,12 +331,13 @@ Edit `src/presets/mcpServers.json`:
 ### Modifying Validation Rules
 
 Update Zod schemas in `src/server/services/validator.ts`:
+
 ```typescript
 const serverSchema = z.object({
   command: z.string().min(1).max(255),
   args: z.array(z.string()).optional(),
   env: z.record(z.string()).optional(),
-  disabled: z.boolean().optional()
+  disabled: z.boolean().optional(),
 });
 ```
 
@@ -334,21 +346,25 @@ const serverSchema = z.object({
 ## Troubleshooting
 
 ### Build Fails
+
 1. Check `npm install` completed
 2. Run `npm run lint` to check TypeScript errors
 3. Verify Node.js >= 22.0.0
 
 ### Tests Fail
+
 - Run `npm test -- --verbose` for details
 - Check for ES module import issues (missing `.js` extensions)
 - Verify Jest config in `jest.config.js`
 
 ### Port Already in Use
+
 ```bash
 mcp-dashboard -p 62000
 ```
 
 ### Config File Not Found
+
 Ensure Claude Code is installed and has been run at least once to create the config file.
 
 ---
@@ -366,10 +382,12 @@ Commit message style: Clear, descriptive, focus on "why" not "what"
 ## Package Distribution
 
 **Entry points:**
+
 - `bin/cli.js`: Executable CLI
 - `dist/server/index.js`: Main export
 
 **Files included in npm package:**
+
 - `bin/`, `dist/`, `README.md`, `LICENSE`
 
 **Minimum Node version**: 22.0.0 (specified in `engines`)
@@ -379,11 +397,13 @@ Commit message style: Clear, descriptive, focus on "why" not "what"
 ## Quick Reference
 
 ### Ports
-- Production: 65432 (configurable)
-- Dev server: 65432
+
+- Production: 4000 (configurable)
+- Dev server: 4000
 - Dev client (Vite): 62000
 
 ### Important Paths
+
 - Server entry: `src/server/index.ts`
 - Client entry: `src/client/src/main.tsx`
 - CLI entry: `bin/cli.js`
@@ -391,6 +411,7 @@ Commit message style: Clear, descriptive, focus on "why" not "what"
 - Tests: `src/server/services/__tests__/`
 
 ### Key NPM Scripts
+
 ```bash
 npm run dev         # Development mode
 npm run build       # Production build
