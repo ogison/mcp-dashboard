@@ -105,7 +105,5 @@ export async function startServer(port: number = 3000): Promise<void> {
   });
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
-  const port = parseInt(process.env.PORT || "3000", 10);
-  startServer(port).catch(console.error);
-}
+const port = parseInt(process.env.PORT || "3000", 10);
+startServer(port).catch(console.error);
