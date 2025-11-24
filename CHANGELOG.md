@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2024-11-23
 
 ### Added
-- Initial release of MCP Setting Tool
+- Initial release of MCP Dashboard
 - Web-based GUI for managing Claude Code MCP settings
 - Complete CRUD operations for MCP servers
 - Built-in preset templates for popular MCP servers:
@@ -22,7 +22,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - SQLite MCP
   - Puppeteer MCP
   - Slack MCP
-- Import/Export configuration functionality
 - Automatic backup before saving changes
 - Real-time configuration validation
 - Enable/Disable toggle for individual servers
@@ -49,5 +48,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Build: TypeScript compiler, Vite bundler
 - Package: npm with CLI support via npx
 
-[unreleased]: https://github.com/yourusername/mcp-setting/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/yourusername/mcp-setting/releases/tag/v0.1.0
+[unreleased]: https://github.com/yourusername/mcp-dashboard/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/yourusername/mcp-dashboard/releases/tag/v0.1.0

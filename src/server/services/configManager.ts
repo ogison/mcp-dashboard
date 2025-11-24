@@ -1,5 +1,16 @@
-import type { MCPConfig, ValidationResult } from "../types/index.js";
-import { getConfigPath, getBackupPath } from "../utils/paths.js";
+import type {
+  MCPConfig,
+  ClaudeUserConfig,
+  ValidationResult,
+  ConfigLocation,
+  ConfigInfoResponse,
+} from "../types/index.js";
+import {
+  getConfigPath,
+  getBackupPath,
+  getActiveConfigLocation,
+  getConfigLocations,
+} from "../utils/paths.js";
 import {
   fileExists,
   readJsonFile,
@@ -15,8 +26,12 @@ export class ConfigManager {
     this.validator = new Validator();
   }
 
+  /**
+   * Load config from the active config file
+   * Returns mcpServers even if file contains additional fields
+   */
   async loadConfig(): Promise<MCPConfig> {
-    const configPath = getConfigPath();
+    const configPath = await getConfigPath();
     const exists = await fileExists(configPath);
 
     if (!exists) {
@@ -24,61 +39,146 @@ export class ConfigManager {
     }
 
     try {
-      const config = await readJsonFile<MCPConfig>(configPath);
+      const config = await readJsonFile<ClaudeUserConfig>(configPath);
+
+      // Return only mcpServers for backward compatibility
+      return { mcpServers: config.mcpServers || {} };
+    } catch (error) {
+      throw new Error(`Failed to load config: ${(error as Error).message}`);
+    }
+  }
+
+  /**
+   * Load full config (including non-mcpServers fields for user config)
+   */
+  async loadFullConfig(): Promise<ClaudeUserConfig | MCPConfig> {
+    const configPath = await getConfigPath();
+    const exists = await fileExists(configPath);
+
+    if (!exists) {
+      return { mcpServers: {} };
+    }
+
+    try {
+      const config = await readJsonFile<ClaudeUserConfig>(configPath);
       return config;
     } catch (error) {
       throw new Error(`Failed to load config: ${(error as Error).message}`);
     }
   }
 
-  async saveConfig(config: MCPConfig): Promise<void> {
-    const validationResult = this.validateConfig(config);
+  /**
+   * Save config to the active config file
+   * For user config (~/.claude.json), preserves non-mcpServers fields
+   */
+  async saveConfig(config: MCPConfig | ClaudeUserConfig): Promise<void> {
+    // Validate mcpServers
+    const validationResult = this.validateConfig({ mcpServers: config.mcpServers });
     if (!validationResult.valid) {
       throw new Error(`Invalid config: ${validationResult.errors.join(", ")}`);
     }
 
-    const configPath = getConfigPath();
+    const configPath = await getConfigPath();
+    const location = await getActiveConfigLocation();
     const exists = await fileExists(configPath);
 
     if (exists) {
-      await this.backupConfig();
+      await this.backupConfig(configPath);
     }
 
     try {
-      await writeJsonFile(configPath, config);
+      let dataToSave: MCPConfig | ClaudeUserConfig;
+
+      if (location?.scope === "user") {
+        // For user config, preserve existing fields
+        const existingConfig = exists
+          ? await readJsonFile<ClaudeUserConfig>(configPath)
+          : {};
+
+        dataToSave = {
+          ...existingConfig,
+          ...config,
+          mcpServers: config.mcpServers,
+        };
+      } else {
+        // For project and claude-desktop configs, save only mcpServers
+        dataToSave = { mcpServers: config.mcpServers };
+      }
+
+      await writeJsonFile(configPath, dataToSave);
     } catch (error) {
       throw new Error(`Failed to save config: ${(error as Error).message}`);
     }
   }
 
-  async backupConfig(): Promise<string> {
-    const configPath = getConfigPath();
-    const exists = await fileExists(configPath);
+  /**
+   * Backup config file
+   */
+  async backupConfig(configPath?: string): Promise<string> {
+    const targetPath = configPath || (await getConfigPath());
+    const exists = await fileExists(targetPath);
 
     if (!exists) {
       throw new Error("Config file does not exist, cannot backup");
     }
 
-    const backupPath = getBackupPath();
+    const backupPath = getBackupPath(targetPath);
 
     try {
-      await copyFile(configPath, backupPath);
+      await copyFile(targetPath, backupPath);
       return backupPath;
     } catch (error) {
       throw new Error(`Failed to backup config: ${(error as Error).message}`);
     }
   }
 
+  /**
+   * Validate config
+   */
   validateConfig(config: MCPConfig): ValidationResult {
     return this.validator.validateMCPConfig(config);
   }
 
+  /**
+   * Get active config path
+   */
   async getConfigPath(): Promise<string> {
     return getConfigPath();
   }
 
+  /**
+   * Get active config location with metadata
+   */
+  async getActiveConfigInfo(): Promise<ConfigInfoResponse> {
+    const location = await getActiveConfigLocation();
+    const allLocations = await getConfigLocations();
+
+    if (location) {
+      return {
+        path: location.path,
+        exists: location.exists,
+        scope: location.scope,
+        displayName: location.displayName,
+        allLocations,
+      };
+    }
+
+    // No config exists, return user config as default
+    const defaultLocation = allLocations.find((loc) => loc.scope === "user");
+    return {
+      path: defaultLocation!.path,
+      exists: false,
+      scope: "user",
+      displayName: defaultLocation!.displayName,
+      allLocations,
+    };
+  }
+
+  /**
+   * Check if config exists
+   */
   async configExists(): Promise<boolean> {
-    const configPath = getConfigPath();
+    const configPath = await getConfigPath();
     return fileExists(configPath);
   }
 }

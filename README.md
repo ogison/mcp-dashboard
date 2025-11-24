@@ -1,13 +1,14 @@
-# MCP Setting Tool
+# MCP Dashboard
 
-A GUI tool for managing Claude Code MCP (Model Context Protocol) settings through a user-friendly web interface.
+A GUI dashboard for managing Claude Code and Claude Desktop MCP (Model Context Protocol) settings through a user-friendly web interface.
 
 ## Features
 
+- **Claude Code Support**: Full support for Claude Code's MCP configuration (.mcp.json, ~/.claude.json)
+- **Multi-Scope Configuration**: Manage project-level, user-level, and Claude Desktop configs
 - **Easy Configuration**: Manage MCP servers through an intuitive web-based GUI
 - **Preset Support**: Quick setup with pre-configured MCP server templates
 - **Live Editing**: Add, edit, delete, and enable/disable MCP servers
-- **Import/Export**: Share configurations easily with JSON import/export
 - **Validation**: Built-in validation to ensure configuration correctness
 - **Auto Backup**: Automatic backup before saving changes
 - **Cross-Platform**: Works on macOS, Windows, and Linux
@@ -15,14 +16,14 @@ A GUI tool for managing Claude Code MCP (Model Context Protocol) settings throug
 ## Installation
 
 ```bash
-npx mcp-setting
+npx mcp-dashboard
 ```
 
 Or install globally:
 
 ```bash
-npm install -g mcp-setting
-mcp-setting
+npm install -g mcp-dashboard
+mcp-dashboard
 ```
 
 ## Usage
@@ -32,7 +33,7 @@ mcp-setting
 Simply run the command to start the tool:
 
 ```bash
-npx mcp-setting
+npx mcp-dashboard
 ```
 
 This will:
@@ -43,7 +44,7 @@ This will:
 ### Command Line Options
 
 ```bash
-mcp-setting [options]
+mcp-dashboard [options]
 
 Options:
   -p, --port <port>  Port number (default: 3000)
@@ -54,11 +55,30 @@ Options:
 
 ### Configuration File Locations
 
-The tool automatically detects your Claude Code configuration file:
+The tool automatically detects and prioritizes configuration files in the following order:
 
+#### Claude Code (Recommended)
+
+**Project Scope** (`.mcp.json` in project directory):
+- Searched upward from current directory to home directory
+- Ideal for team-shared, version-controlled configurations
+- Priority: **Highest**
+
+**User Scope** (`~/.claude.json`):
+- All platforms: `~/.claude.json` in home directory
+- Personal settings shared across all projects
+- May contain additional Claude Code settings (theme, projects, etc.)
+- Priority: **Medium**
+
+#### Claude Desktop (Legacy Support)
+
+**Claude Desktop Config**:
 - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
 - **Windows**: `%APPDATA%/Claude/claude_desktop_config.json`
 - **Linux**: `~/.config/Claude/claude_desktop_config.json`
+- Priority: **Lowest** (backward compatibility)
+
+The tool displays the active configuration file and its scope (Project/User/Claude Desktop) in the header.
 
 ## Managing MCP Servers
 
@@ -106,27 +126,14 @@ The tool automatically detects your Claude Code configuration file:
 
 Click the checkbox next to the server name to toggle enabled/disabled state.
 
-## Import/Export
-
-### Export Configuration
-
-1. Click "Export" button in the header
-2. Configuration will be downloaded as JSON
-
-### Import Configuration
-
-1. Click "Import" button in the header
-2. Select a JSON configuration file
-3. Configuration will be validated and applied
-
 ## Development
 
 ### Setup
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/mcp-setting.git
-cd mcp-setting
+git clone https://github.com/yourusername/mcp-dashboard.git
+cd mcp-dashboard
 
 # Install dependencies
 npm install
@@ -149,7 +156,7 @@ npm run dev:client  # Frontend
 ### Project Structure
 
 ```
-mcp-setting/
+mcp-dashboard/
 ├── bin/
 │   └── cli.js              # CLI entry point
 ├── src/
@@ -205,7 +212,7 @@ mcp-setting/
 If port 3000 is already in use:
 
 ```bash
-mcp-setting -p 3001
+mcp-dashboard -p 3001
 ```
 
 ### Browser Doesn't Open
@@ -213,7 +220,7 @@ mcp-setting -p 3001
 If the browser doesn't open automatically:
 
 ```bash
-mcp-setting --no-open
+mcp-dashboard --no-open
 ```
 
 Then manually open: `http://localhost:3000`
@@ -233,4 +240,4 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## Support
 
 For issues and feature requests, please visit:
-https://github.com/yourusername/mcp-setting/issues
+https://github.com/yourusername/mcp-dashboard/issues

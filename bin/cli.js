@@ -8,8 +8,8 @@ import { startServer } from '../dist/server/index.js';
 const program = new Command();
 
 program
-  .name('mcp-setting')
-  .description('GUI tool for managing Claude Code MCP settings')
+  .name('mcp-dashboard')
+  .description('GUI dashboard for managing Claude Code MCP settings')
   .version('0.1.0')
   .option('-p, --port <port>', 'Port number', '3000')
   .option('--no-open', 'Do not open browser automatically')
@@ -22,11 +22,11 @@ program
     }
 
     try {
-      console.log(chalk.blue('Starting MCP Setting Tool...'));
+      console.log(chalk.blue('Starting MCP Dashboard...'));
 
       await startServer(port);
 
-      console.log(chalk.green('✓ MCP Setting Tool started successfully!'));
+      console.log(chalk.green('✓ MCP Dashboard started successfully!'));
       console.log(chalk.blue(`✓ Server running at http://localhost:${port}`));
       console.log(chalk.gray('\nPress Ctrl+C to stop the server\n'));
 

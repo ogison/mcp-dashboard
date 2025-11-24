@@ -1,9 +1,9 @@
-# MCP Setting Tool - 実装計画書
+# MCP Dashboard - 実装計画書
 
 ## 1. プロジェクト構造
 
 ```
-mcp-setting/
+mcp-dashboard/
 ├── package.json
 ├── tsconfig.json
 ├── .gitignore
@@ -145,11 +145,11 @@ mcp-setting/
 #### タスク 1.1: package.json 設定
 ```json
 {
-  "name": "mcp-setting",
+  "name": "mcp-dashboard",
   "version": "0.1.0",
   "description": "GUI tool for managing Claude Code MCP settings",
   "bin": {
-    "mcp-setting": "./dist/cli.js"
+    "mcp-dashboard": "./dist/cli.js"
   },
   "scripts": {
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
@@ -355,7 +355,7 @@ import chalk from 'chalk';
 const program = new Command();
 
 program
-  .name('mcp-setting')
+  .name('mcp-dashboard')
   .description('GUI tool for managing Claude Code MCP settings')
   .option('-p, --port <port>', 'Port number', '3000')
   .option('--no-open', 'Do not open browser automatically')
@@ -517,7 +517,7 @@ describe('ServerModal', () => {
 - [ ] npm login
 - [ ] npm publish --dry-run でチェック
 - [ ] npm publish で公開
-- [ ] 公開後の動作確認（npx mcp-setting）
+- [ ] 公開後の動作確認（npx mcp-dashboard）
 
 ## 7. メンテナンス計画
 

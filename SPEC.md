@@ -1,4 +1,4 @@
-# MCP Setting Tool - 仕様書
+# MCP Dashboard - 仕様書
 
 ## 1. プロジェクト概要
 
@@ -11,7 +11,7 @@ Claude CodeのModel Context Protocol (MCP)設定を、ブラウザベースのGU
 - 複数のMCPサーバーを効率的に管理したいユーザー
 
 ### 1.3 プロジェクト名
-`mcp-setting`
+`mcp-dashboard`
 
 ## 2. 機能要件
 
@@ -19,7 +19,7 @@ Claude CodeのModel Context Protocol (MCP)設定を、ブラウザベースのGU
 
 #### 2.1.1 コマンドライン起動
 ```bash
-npx mcp-setting
+npx mcp-dashboard
 ```
 - Web サーバーを起動
 - デフォルトブラウザを自動的に開く
@@ -100,7 +100,7 @@ npx mcp-setting
 
 ```
 +--------------------------------------------------+
-|  MCP Setting Tool              [Import] [Export] |
+|  MCP Dashboard                 [Import] [Export] |
 +--------------------------------------------------+
 |                                                  |
 |  設定ファイルパス: ~/.config/Claude/claude_...  |

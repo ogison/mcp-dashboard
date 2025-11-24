@@ -105,6 +105,62 @@
           "SLACK_TEAM_ID": "<your-team-id>"
         }
       }
+    },
+    {
+      "id": "context7",
+      "name": "Context7 MCP",
+      "description": "Context7 integration for advanced context management",
+      "category": "Custom",
+      "config": {
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-context7"],
+        "env": {
+          "CONTEXT7_API_KEY": "<your-api-key>",
+          "CONTEXT7_ENDPOINT": "<your-endpoint>"
+        }
+      }
+    },
+    {
+      "id": "serena",
+      "name": "Serena MCP",
+      "description": "Serena integration for workflow management",
+      "category": "Custom",
+      "config": {
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-serena"],
+        "env": {
+          "SERENA_API_KEY": "<your-api-key>",
+          "SERENA_WORKSPACE_ID": "<your-workspace-id>"
+        }
+      }
+    },
+    {
+      "id": "playwright",
+      "name": "Playwright MCP",
+      "description": "Browser automation with Playwright",
+      "category": "Official",
+      "config": {
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-playwright"],
+        "env": {
+          "PLAYWRIGHT_BROWSER": "chromium"
+        }
+      }
+    },
+    {
+      "id": "chrome",
+      "name": "Chrome MCP",
+      "description": "Chrome DevTools Protocol integration",
+      "category": "Official",
+      "config": {
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-chrome"],
+        "env": {
+          "CHROME_EXECUTABLE_PATH": "/usr/bin/google-chrome",
+          "CHROME_HEADLESS": "true",
+          "CHROME_PORT": "9222"
+        }
+      }
     }
   ]
 }

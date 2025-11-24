@@ -9,6 +9,25 @@ export interface MCPConfig {
   mcpServers: Record<string, MCPServer>;
 }
 
+// Claude Code user config (~/.claude.json) with additional fields
+export interface ClaudeUserConfig extends MCPConfig {
+  numStartups?: number;
+  theme?: string;
+  projects?: Record<string, any>;
+  hasCompletedOnboarding?: boolean;
+  [key: string]: any; // Allow other fields
+}
+
+// Configuration file location and scope information
+export type ConfigScope = 'project' | 'user' | 'claude-desktop';
+
+export interface ConfigLocation {
+  path: string;
+  scope: ConfigScope;
+  exists: boolean;
+  displayName: string; // User-friendly name for UI
+}
+
 export interface Preset {
   id: string;
   name: string;
@@ -31,6 +50,13 @@ export interface ApiResponse<T = unknown> {
 export interface ConfigPathResponse {
   path: string;
   exists: boolean;
+}
+
+// Extended response with scope information
+export interface ConfigInfoResponse extends ConfigPathResponse {
+  scope: ConfigScope;
+  displayName: string;
+  allLocations?: ConfigLocation[];
 }
 
 export interface TestConnectionResponse {

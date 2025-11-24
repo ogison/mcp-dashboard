@@ -1,9 +1,11 @@
 import type {
   MCPConfig,
+  ClaudeUserConfig,
   Preset,
   ValidationResult,
   ApiResponse,
   ConfigPathResponse,
+  ConfigInfoResponse,
 } from "../types";
 
 const API_BASE = "/api";
@@ -24,7 +26,12 @@ export const api = {
     return handleResponse<MCPConfig>(response);
   },
 
-  async saveConfig(config: MCPConfig): Promise<ApiResponse> {
+  async getFullConfig(): Promise<ClaudeUserConfig | MCPConfig> {
+    const response = await fetch(`${API_BASE}/config/full`);
+    return handleResponse<ClaudeUserConfig | MCPConfig>(response);
+  },
+
+  async saveConfig(config: MCPConfig | ClaudeUserConfig): Promise<ApiResponse> {
     const response = await fetch(`${API_BASE}/config`, {
       method: "POST",
       headers: {
@@ -35,20 +42,14 @@ export const api = {
     return handleResponse<ApiResponse>(response);
   },
 
-  async validateConfig(config: MCPConfig): Promise<ValidationResult> {
-    const response = await fetch(`${API_BASE}/config/validate`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(config),
-    });
-    return handleResponse<ValidationResult>(response);
-  },
-
   async getConfigPath(): Promise<ConfigPathResponse> {
     const response = await fetch(`${API_BASE}/config/path`);
     return handleResponse<ConfigPathResponse>(response);
+  },
+
+  async getConfigInfo(): Promise<ConfigInfoResponse> {
+    const response = await fetch(`${API_BASE}/config/info`);
+    return handleResponse<ConfigInfoResponse>(response);
   },
 
   async getPresets(): Promise<{ presets: Preset[] }> {

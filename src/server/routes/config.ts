@@ -1,11 +1,11 @@
 import express, { Request, Response } from "express";
 import { ConfigManager } from "../services/configManager.js";
-import { getConfigPath } from "../utils/paths.js";
-import { fileExists } from "../utils/fileSystem.js";
 import type {
   MCPConfig,
+  ClaudeUserConfig,
   ApiResponse,
   ConfigPathResponse,
+  ConfigInfoResponse,
 } from "../types/index.js";
 
 const router = express.Router();
@@ -24,11 +24,25 @@ router.get("/config", async (_req: Request, res: Response) => {
   }
 });
 
+// Load full config (including non-mcpServers fields)
+router.get("/config/full", async (_req: Request, res: Response) => {
+  try {
+    const config = await configManager.loadFullConfig();
+    res.json(config);
+  } catch (error) {
+    console.error("Error loading full config:", error);
+    res.status(500).json({
+      success: false,
+      message: `Failed to load full config: ${(error as Error).message}`,
+    } as ApiResponse);
+  }
+});
+
 router.post("/config", async (req: Request, res: Response) => {
   try {
-    const config: MCPConfig = req.body;
+    const config: MCPConfig | ClaudeUserConfig = req.body;
 
-    const validationResult = configManager.validateConfig(config);
+    const validationResult = configManager.validateConfig({ mcpServers: config.mcpServers });
     if (!validationResult.valid) {
       res.status(400).json({
         success: false,
@@ -53,25 +67,25 @@ router.post("/config", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/config/validate", async (req: Request, res: Response) => {
+// Get active config information (path, scope, all locations)
+router.get("/config/info", async (_req: Request, res: Response) => {
   try {
-    const config: MCPConfig = req.body;
-    const validationResult = configManager.validateConfig(config);
-
-    res.json(validationResult);
+    const info = await configManager.getActiveConfigInfo();
+    res.json(info as ConfigInfoResponse);
   } catch (error) {
-    console.error("Error validating config:", error);
+    console.error("Error getting config info:", error);
     res.status(500).json({
-      valid: false,
-      errors: [`Validation error: ${(error as Error).message}`],
-    });
+      success: false,
+      message: `Failed to get config info: ${(error as Error).message}`,
+    } as ApiResponse);
   }
 });
 
+// Legacy endpoint for backward compatibility
 router.get("/config/path", async (_req: Request, res: Response) => {
   try {
-    const path = getConfigPath();
-    const exists = await fileExists(path);
+    const path = await configManager.getConfigPath();
+    const exists = await configManager.configExists();
 
     res.json({
       path,

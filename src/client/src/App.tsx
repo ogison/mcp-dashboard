@@ -4,9 +4,11 @@ import { ServerCard } from "./components/ServerCard";
 import { ServerModal } from "./components/ServerModal";
 import { PresetModal } from "./components/PresetModal";
 import { ToastContainer } from "./components/Toast";
+import { TabSwitcher, TabType } from "./components/TabSwitcher";
+import { JsonEditor } from "./components/JsonEditor";
 import { useConfig } from "./hooks/useConfig";
 import { api } from "./services/api";
-import type { MCPServer, Preset, Toast } from "./types";
+import type { MCPServer, MCPConfig, Preset, Toast, ConfigScope } from "./types";
 
 function App() {
   const {
@@ -19,6 +21,8 @@ function App() {
     deleteServer,
   } = useConfig();
   const [configPath, setConfigPath] = useState("");
+  const [configScope, setConfigScope] = useState<ConfigScope | undefined>();
+  const [configDisplayName, setConfigDisplayName] = useState<string>("");
   const [isServerModalOpen, setIsServerModalOpen] = useState(false);
   const [isPresetModalOpen, setIsPresetModalOpen] = useState(false);
   const [editingServer, setEditingServer] = useState<{
@@ -27,10 +31,18 @@ function App() {
   } | null>(null);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [activeTab, setActiveTab] = useState<TabType>('list');
 
   useEffect(() => {
-    api.getConfigPath().then((data) => {
+    api.getConfigInfo().then((data) => {
       setConfigPath(data.path);
+      setConfigScope(data.scope);
+      setConfigDisplayName(data.displayName);
+    }).catch(() => {
+      // Fallback to legacy endpoint if getConfigInfo fails
+      api.getConfigPath().then((data) => {
+        setConfigPath(data.path);
+      });
     });
   }, []);
 
@@ -103,54 +115,6 @@ function App() {
     }
   };
 
-  const handleExport = () => {
-    if (config) {
-      const dataStr = JSON.stringify(config, null, 2);
-      const dataBlob = new Blob([dataStr], { type: "application/json" });
-      const url = URL.createObjectURL(dataBlob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = "claude_desktop_config.json";
-      link.click();
-      URL.revokeObjectURL(url);
-      addToast("success", "Configuration exported");
-    }
-  };
-
-  const handleImport = () => {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "application/json";
-    input.onchange = (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = async (event) => {
-          try {
-            const imported = JSON.parse(event.target?.result as string);
-            const validationResult = await api.validateConfig(imported);
-            if (validationResult.valid) {
-              const success = await saveConfig(imported);
-              if (success) {
-                addToast("success", "Configuration imported successfully");
-              } else {
-                addToast("error", "Failed to import configuration");
-              }
-            } else {
-              addToast(
-                "error",
-                `Invalid configuration: ${validationResult.errors.join(", ")}`,
-              );
-            }
-          } catch (err) {
-            addToast("error", "Failed to parse imported file");
-          }
-        };
-        reader.readAsText(file);
-      }
-    };
-    input.click();
-  };
 
   const handlePresetSelect = (preset: Preset) => {
     const baseName = preset.id;
@@ -164,6 +128,17 @@ function App() {
 
     setEditingServer({ name: serverName, server: preset.config });
     setIsServerModalOpen(true);
+  };
+
+  const handleJsonChange = (newConfig: MCPConfig) => {
+    if (config) {
+      // 新しい設定を反映
+      Object.keys(config.mcpServers).forEach(key => deleteServer(key));
+      Object.entries(newConfig.mcpServers).forEach(([name, server]) => {
+        updateServer(name, server);
+      });
+      setHasUnsavedChanges(true);
+    }
   };
 
   if (loading) {
@@ -188,51 +163,64 @@ function App() {
     <div className="min-h-screen bg-gray-50">
       <Header
         configPath={configPath}
+        configScope={configScope}
+        configDisplayName={configDisplayName}
         onReload={loadConfig}
-        onExport={handleExport}
-        onImport={handleImport}
       />
 
       <div className="max-w-7xl mx-auto p-6">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">MCP Servers</h2>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setIsPresetModalOpen(true)}
-                className="px-4 py-2 bg-white border border-primary text-primary rounded-md hover:bg-blue-50 transition-colors"
-              >
-                + Add from Preset
-              </button>
-              <button
-                onClick={handleAddServer}
-                className="px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-600 transition-colors"
-              >
-                + Add Server
-              </button>
-            </div>
-          </div>
+          <TabSwitcher activeTab={activeTab} onTabChange={setActiveTab} />
 
-          {servers.length === 0 ? (
-            <div className="text-center py-12 text-gray-500">
-              <p className="text-lg mb-4">No MCP servers configured</p>
-              <p className="text-sm">
-                Click "Add Server" or "Add from Preset" to get started
-              </p>
-            </div>
+          {activeTab === 'list' ? (
+            <>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">MCP Servers</h2>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setIsPresetModalOpen(true)}
+                    className="px-4 py-2 bg-white border border-primary text-primary rounded-md hover:bg-blue-50 transition-colors"
+                  >
+                    + Add from Preset
+                  </button>
+                  <button
+                    onClick={handleAddServer}
+                    className="px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-600 transition-colors"
+                  >
+                    + Add Server
+                  </button>
+                </div>
+              </div>
+
+              {servers.length === 0 ? (
+                <div className="text-center py-12 text-gray-500">
+                  <p className="text-lg mb-4">No MCP servers configured</p>
+                  <p className="text-sm">
+                    Click "Add Server" or "Add from Preset" to get started
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {servers.map(([serverName, server]) => (
+                    <ServerCard
+                      key={serverName}
+                      serverName={serverName}
+                      server={server}
+                      onEdit={handleEditServer}
+                      onDelete={handleDeleteServer}
+                      onToggle={handleToggleServer}
+                    />
+                  ))}
+                </div>
+              )}
+            </>
           ) : (
-            <div className="space-y-4">
-              {servers.map(([serverName, server]) => (
-                <ServerCard
-                  key={serverName}
-                  serverName={serverName}
-                  server={server}
-                  onEdit={handleEditServer}
-                  onDelete={handleDeleteServer}
-                  onToggle={handleToggleServer}
-                />
-              ))}
-            </div>
+            config && (
+              <JsonEditor
+                config={config}
+                onChange={handleJsonChange}
+              />
+            )
           )}
         </div>
 

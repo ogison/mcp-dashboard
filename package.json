@@ -1,9 +1,9 @@
 {
-  "name": "mcp-setting",
+  "name": "mcp-dashboard",
   "version": "0.1.0",
   "description": "GUI tool for managing Claude Code MCP settings",
   "bin": {
-    "mcp-setting": "./bin/cli.js"
+    "mcp-dashboard": "./bin/cli.js"
   },
   "main": "./dist/server/index.js",
   "type": "module",

@@ -57,13 +57,13 @@ jobs:
             ## Installation
 
             ```bash
-            npm install -g mcp-setting@${{ steps.version.outputs.VERSION }}
+            npm install -g mcp-dashboard@${{ steps.version.outputs.VERSION }}
             ```
 
             Or use with npx:
 
             ```bash
-            npx mcp-setting@${{ steps.version.outputs.VERSION }}
+            npx mcp-dashboard@${{ steps.version.outputs.VERSION }}
             ```
           draft: false
           prerelease: ${{ contains(steps.version.outputs.VERSION, '-') }}
