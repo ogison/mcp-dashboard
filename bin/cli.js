@@ -11,7 +11,7 @@ program
   .name('mcp-dashboard')
   .description('GUI dashboard for managing Claude Code MCP settings')
   .version('0.1.0')
-  .option('-p, --port <port>', 'Port number', '3000')
+  .option('-p, --port <port>', 'Port number', '65432')
   .option('--no-open', 'Do not open browser automatically')
   .action(async (options) => {
     const port = parseInt(options.port, 10);

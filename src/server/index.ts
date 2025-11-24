@@ -68,7 +68,7 @@ export function createApp(): Application {
   return app;
 }
 
-export async function startServer(port: number = 3000): Promise<void> {
+export async function startServer(port: number = 65432): Promise<void> {
   const app = createApp();
 
   return new Promise((resolve, reject) => {
@@ -105,5 +105,5 @@ export async function startServer(port: number = 3000): Promise<void> {
   });
 }
 
-const port = parseInt(process.env.PORT || "3000", 10);
+const port = parseInt(process.env.PORT || "65432", 10);
 startServer(port).catch(console.error);
