@@ -1,10 +1,13 @@
-import type { ConfigScope } from "../types";
+import type { ConfigScope, ConfigLocation } from "../types";
 
 interface HeaderProps {
   configPath: string;
   configScope?: ConfigScope;
   configDisplayName?: string;
+  locations?: ConfigLocation[];
   onReload: () => void;
+  onScopeChange?: (scope: ConfigScope) => void;
+  isSwitchingScope?: boolean;
 }
 
 function getScopeBadgeColor(scope?: ConfigScope): string {
@@ -38,7 +41,16 @@ export function Header({
   configScope,
   configDisplayName,
   onReload,
+  locations,
+  onScopeChange,
+  isSwitchingScope,
 }: HeaderProps) {
+  const selectedScope =
+    configScope ||
+    locations?.find((location) => location.exists)?.scope ||
+    locations?.[0]?.scope ||
+    "";
+
   return (
     <div className="bg-white shadow-sm border-b border-gray-200 p-6">
       <div className="max-w-7xl mx-auto">
@@ -63,12 +75,33 @@ export function Header({
               {configPath}
             </span>
           </div>
-          <button
-            onClick={onReload}
-            className="px-3 py-1 text-primary hover:text-blue-700 font-medium"
-          >
-            Reload
-          </button>
+          <div className="flex items-center gap-3">
+            {locations && locations.length > 0 && (
+              <select
+                className="text-sm border border-gray-300 rounded px-2 py-1 bg-white text-gray-700"
+                value={selectedScope}
+                onChange={(e) => {
+                  const value = e.target.value as ConfigScope;
+                  onScopeChange?.(value);
+                }}
+                disabled={isSwitchingScope}
+              >
+                {locations.map((location) => (
+                  <option key={location.scope} value={location.scope}>
+                    {location.displayName}
+                    {!location.exists ? " (create)" : ""}
+                  </option>
+                ))}
+              </select>
+            )}
+            <button
+              onClick={onReload}
+              className="px-3 py-1 text-primary hover:text-blue-700 font-medium disabled:opacity-60"
+              disabled={isSwitchingScope}
+            >
+              Reload
+            </button>
+          </div>
         </div>
       </div>
     </div>

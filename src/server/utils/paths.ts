@@ -109,7 +109,7 @@ export async function getConfigLocations(
     path: userPath,
     scope: "user",
     exists: userExists,
-    displayName: "~/.claude.json (User)",
+    displayName: "Claude Code Config",
   });
 
   // 3. Claude Desktop scope (legacy)
@@ -132,11 +132,28 @@ export async function getConfigLocations(
 }
 
 /**
+ * Get config location by scope (project/user/claude-desktop)
+ */
+export async function getConfigLocationByScope(
+  scope: ConfigScope,
+  startDir?: string,
+): Promise<ConfigLocation | null> {
+  const locations = await getConfigLocations(startDir);
+  return locations.find((loc) => loc.scope === scope) || null;
+}
+
+/**
  * Get the active config location (first existing file in priority order)
+ * If a scope is provided, return that location even if the file is missing.
  */
 export async function getActiveConfigLocation(
   startDir?: string,
+  scope?: ConfigScope,
 ): Promise<ConfigLocation | null> {
+  if (scope) {
+    return getConfigLocationByScope(scope, startDir);
+  }
+
   const locations = await getConfigLocations(startDir);
   return locations.find((loc) => loc.exists) || null;
 }
@@ -145,10 +162,13 @@ export async function getActiveConfigLocation(
  * Get the config path (backward compatible function)
  * Returns the first existing config file, or user config path if none exist
  */
-export async function getConfigPath(startDir?: string): Promise<string> {
-  const activeLocation = await getActiveConfigLocation(startDir);
-  if (activeLocation) {
-    return activeLocation.path;
+export async function getConfigPath(
+  startDir?: string,
+  scope?: ConfigScope,
+): Promise<string> {
+  const targetLocation = await getActiveConfigLocation(startDir, scope);
+  if (targetLocation) {
+    return targetLocation.path;
   }
 
   // If no config exists, return user config path (for creation)

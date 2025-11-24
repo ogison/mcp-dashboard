@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Header } from "./components/Header";
 import { ServerCard } from "./components/ServerCard";
 import { ServerModal } from "./components/ServerModal";
@@ -13,16 +13,16 @@ import type { MCPServer, MCPConfig, Preset, Toast, ConfigScope } from "./types";
 function App() {
   const {
     config,
+    configInfo,
+    selectedScope,
     loading,
     error,
     loadConfig,
     saveConfig,
     updateServer,
     deleteServer,
+    changeScope,
   } = useConfig();
-  const [configPath, setConfigPath] = useState("");
-  const [configScope, setConfigScope] = useState<ConfigScope | undefined>();
-  const [configDisplayName, setConfigDisplayName] = useState<string>("");
   const [isServerModalOpen, setIsServerModalOpen] = useState(false);
   const [isPresetModalOpen, setIsPresetModalOpen] = useState(false);
   const [editingServer, setEditingServer] = useState<{
@@ -31,20 +31,8 @@ function App() {
   } | null>(null);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [activeTab, setActiveTab] = useState<TabType>('list');
-
-  useEffect(() => {
-    api.getConfigInfo().then((data) => {
-      setConfigPath(data.path);
-      setConfigScope(data.scope);
-      setConfigDisplayName(data.displayName);
-    }).catch(() => {
-      // Fallback to legacy endpoint if getConfigInfo fails
-      api.getConfigPath().then((data) => {
-        setConfigPath(data.path);
-      });
-    });
-  }, []);
+  const [activeTab, setActiveTab] = useState<TabType>("list");
+  const [isSwitchingScope, setIsSwitchingScope] = useState(false);
 
   const addToast = (type: Toast["type"], message: string) => {
     const id = Date.now().toString();
@@ -109,9 +97,19 @@ function App() {
 
   const handleDiscardChanges = () => {
     if (window.confirm("Are you sure you want to discard all changes?")) {
-      loadConfig();
+      loadConfig(selectedScope);
       setHasUnsavedChanges(false);
       addToast("info", "Changes discarded");
+    }
+  };
+
+  const handleScopeChange = async (scope: ConfigScope) => {
+    setIsSwitchingScope(true);
+    try {
+      await changeScope(scope);
+      setHasUnsavedChanges(false);
+    } finally {
+      setIsSwitchingScope(false);
     }
   };
 
@@ -132,8 +130,8 @@ function App() {
 
   const handleJsonChange = (newConfig: MCPConfig) => {
     if (config) {
-      // 新しい設定を反映
-      Object.keys(config.mcpServers).forEach(key => deleteServer(key));
+      // Replace existing configuration with imported JSON content
+      Object.keys(config.mcpServers).forEach((key) => deleteServer(key));
       Object.entries(newConfig.mcpServers).forEach(([name, server]) => {
         updateServer(name, server);
       });
@@ -162,10 +160,16 @@ function App() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header
-        configPath={configPath}
-        configScope={configScope}
-        configDisplayName={configDisplayName}
-        onReload={loadConfig}
+        configPath={configInfo?.path || ""}
+        configScope={configInfo?.scope}
+        configDisplayName={configInfo?.displayName}
+        locations={configInfo?.allLocations}
+        onReload={async () => {
+          await loadConfig(selectedScope);
+          setHasUnsavedChanges(false);
+        }}
+        onScopeChange={handleScopeChange}
+        isSwitchingScope={isSwitchingScope}
       />
 
       <div className="max-w-7xl mx-auto p-6">

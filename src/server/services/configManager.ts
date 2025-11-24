@@ -4,6 +4,7 @@ import type {
   ValidationResult,
   ConfigLocation,
   ConfigInfoResponse,
+  ConfigScope,
 } from "../types/index.js";
 import {
   getConfigPath,
@@ -30,8 +31,8 @@ export class ConfigManager {
    * Load config from the active config file
    * Returns mcpServers even if file contains additional fields
    */
-  async loadConfig(): Promise<MCPConfig> {
-    const configPath = await getConfigPath();
+  async loadConfig(scope?: ConfigScope): Promise<MCPConfig> {
+    const configPath = await getConfigPath(undefined, scope);
     const exists = await fileExists(configPath);
 
     if (!exists) {
@@ -51,8 +52,8 @@ export class ConfigManager {
   /**
    * Load full config (including non-mcpServers fields for user config)
    */
-  async loadFullConfig(): Promise<ClaudeUserConfig | MCPConfig> {
-    const configPath = await getConfigPath();
+  async loadFullConfig(scope?: ConfigScope): Promise<ClaudeUserConfig | MCPConfig> {
+    const configPath = await getConfigPath(undefined, scope);
     const exists = await fileExists(configPath);
 
     if (!exists) {
@@ -71,15 +72,18 @@ export class ConfigManager {
    * Save config to the active config file
    * For user config (~/.claude.json), preserves non-mcpServers fields
    */
-  async saveConfig(config: MCPConfig | ClaudeUserConfig): Promise<void> {
+  async saveConfig(
+    config: MCPConfig | ClaudeUserConfig,
+    scope?: ConfigScope,
+  ): Promise<void> {
     // Validate mcpServers
     const validationResult = this.validateConfig({ mcpServers: config.mcpServers });
     if (!validationResult.valid) {
       throw new Error(`Invalid config: ${validationResult.errors.join(", ")}`);
     }
 
-    const configPath = await getConfigPath();
-    const location = await getActiveConfigLocation();
+    const configPath = await getConfigPath(undefined, scope);
+    const location = await getActiveConfigLocation(undefined, scope);
     const exists = await fileExists(configPath);
 
     if (exists) {
@@ -142,26 +146,26 @@ export class ConfigManager {
   /**
    * Get active config path
    */
-  async getConfigPath(): Promise<string> {
-    return getConfigPath();
+  async getConfigPath(scope?: ConfigScope): Promise<string> {
+    return getConfigPath(undefined, scope);
   }
 
   /**
    * Get active config location with metadata
    */
-  async getActiveConfigInfo(): Promise<ConfigInfoResponse> {
-    const location = await getActiveConfigLocation();
+  async getActiveConfigInfo(scope?: ConfigScope): Promise<ConfigInfoResponse> {
+    const location = await getActiveConfigLocation(undefined, scope);
     const allLocations = await getConfigLocations();
 
     if (location) {
       return {
         path: location.path,
         exists: location.exists,
-        scope: location.scope,
-        displayName: location.displayName,
-        allLocations,
-      };
-    }
+      scope: location.scope,
+      displayName: location.displayName,
+      allLocations,
+    };
+  }
 
     // No config exists, return user config as default
     const defaultLocation = allLocations.find((loc) => loc.scope === "user");
@@ -177,8 +181,8 @@ export class ConfigManager {
   /**
    * Check if config exists
    */
-  async configExists(): Promise<boolean> {
-    const configPath = await getConfigPath();
+  async configExists(scope?: ConfigScope): Promise<boolean> {
+    const configPath = await getConfigPath(undefined, scope);
     return fileExists(configPath);
   }
 }

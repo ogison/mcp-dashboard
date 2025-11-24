@@ -2,13 +2,17 @@ import type {
   MCPConfig,
   ClaudeUserConfig,
   Preset,
-  ValidationResult,
   ApiResponse,
   ConfigPathResponse,
   ConfigInfoResponse,
+  ConfigScope,
 } from "../types";
 
 const API_BASE = "/api";
+
+function buildScopeQuery(scope?: ConfigScope): string {
+  return scope ? `?scope=${encodeURIComponent(scope)}` : "";
+}
 
 async function handleResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
@@ -21,34 +25,48 @@ async function handleResponse<T>(response: Response): Promise<T> {
 }
 
 export const api = {
-  async getConfig(): Promise<MCPConfig> {
-    const response = await fetch(`${API_BASE}/config`);
+  async getConfig(scope?: ConfigScope): Promise<MCPConfig> {
+    const response = await fetch(`${API_BASE}/config${buildScopeQuery(scope)}`);
     return handleResponse<MCPConfig>(response);
   },
 
-  async getFullConfig(): Promise<ClaudeUserConfig | MCPConfig> {
-    const response = await fetch(`${API_BASE}/config/full`);
+  async getFullConfig(
+    scope?: ConfigScope,
+  ): Promise<ClaudeUserConfig | MCPConfig> {
+    const response = await fetch(
+      `${API_BASE}/config/full${buildScopeQuery(scope)}`,
+    );
     return handleResponse<ClaudeUserConfig | MCPConfig>(response);
   },
 
-  async saveConfig(config: MCPConfig | ClaudeUserConfig): Promise<ApiResponse> {
-    const response = await fetch(`${API_BASE}/config`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+  async saveConfig(
+    config: MCPConfig | ClaudeUserConfig,
+    scope?: ConfigScope,
+  ): Promise<ApiResponse> {
+    const response = await fetch(
+      `${API_BASE}/config${buildScopeQuery(scope)}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(config),
       },
-      body: JSON.stringify(config),
-    });
+    );
     return handleResponse<ApiResponse>(response);
   },
 
-  async getConfigPath(): Promise<ConfigPathResponse> {
-    const response = await fetch(`${API_BASE}/config/path`);
+  async getConfigPath(scope?: ConfigScope): Promise<ConfigPathResponse> {
+    const response = await fetch(
+      `${API_BASE}/config/path${buildScopeQuery(scope)}`,
+    );
     return handleResponse<ConfigPathResponse>(response);
   },
 
-  async getConfigInfo(): Promise<ConfigInfoResponse> {
-    const response = await fetch(`${API_BASE}/config/info`);
+  async getConfigInfo(scope?: ConfigScope): Promise<ConfigInfoResponse> {
+    const response = await fetch(
+      `${API_BASE}/config/info${buildScopeQuery(scope)}`,
+    );
     return handleResponse<ConfigInfoResponse>(response);
   },
 
