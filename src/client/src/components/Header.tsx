@@ -91,7 +91,10 @@ export function Header({
                 disabled={isSwitchingScope}
               >
                 {locations.map((location) => (
-                  <option key={`${location.scope}-${location.path}`} value={location.scope}>
+                  <option
+                    key={`${location.scope}-${location.path}`}
+                    value={location.scope}
+                  >
                     {location.displayName}
                     {!location.exists ? " (create)" : ""}
                   </option>

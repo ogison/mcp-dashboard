@@ -12,7 +12,12 @@ import type {
 const router = express.Router();
 const configManager = new ConfigManager();
 
-const validScopes: ConfigScope[] = ["project", "cursor", "user", "claude-desktop"];
+const validScopes: ConfigScope[] = [
+  "project",
+  "cursor",
+  "user",
+  "claude-desktop",
+];
 
 function parseScope(scope?: string): ConfigScope | undefined {
   if (!scope) return undefined;
