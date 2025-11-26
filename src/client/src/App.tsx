@@ -146,15 +146,8 @@ function App() {
     );
   }
 
-  if (error && !config) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-xl text-error">Error: {error}</div>
-      </div>
-    );
-  }
-
   const servers = config ? Object.entries(config.mcpServers) : [];
+  const isConfigAvailable = Boolean(config);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -172,6 +165,13 @@ function App() {
       />
 
       <div className="max-w-7xl mx-auto p-6">
+        {error && (
+          <div className="mb-4 p-4 rounded-md border border-error/30 bg-error/5 text-error">
+            Error: {error}.
+            別のスコープを選択するか、設定ファイルを修正してください。
+          </div>
+        )}
+
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <TabSwitcher activeTab={activeTab} onTabChange={setActiveTab} />
 
@@ -184,20 +184,29 @@ function App() {
                 <div className="flex gap-2">
                   <button
                     onClick={() => setIsPresetModalOpen(true)}
-                    className="px-4 py-2 bg-white border border-primary text-primary rounded-md hover:bg-blue-50 transition-colors"
+                    className="px-4 py-2 bg-white border border-primary text-primary rounded-md hover:bg-blue-50 transition-colors disabled:opacity-50"
+                    disabled={!isConfigAvailable}
                   >
                     + Add from Preset
                   </button>
                   <button
                     onClick={handleAddServer}
-                    className="px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-600 transition-colors"
+                    className="px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-600 transition-colors disabled:opacity-50"
+                    disabled={!isConfigAvailable}
                   >
                     + Add Server
                   </button>
                 </div>
               </div>
 
-              {servers.length === 0 ? (
+              {!isConfigAvailable ? (
+                <div className="text-center py-12 text-gray-500">
+                  <p className="text-lg mb-4">設定を読み込めませんでした。</p>
+                  <p className="text-sm">
+                    上部のプルダウンから別のConfigを選択するか、ファイルの内容を修正してください。
+                  </p>
+                </div>
+              ) : servers.length === 0 ? (
                 <div className="text-center py-12 text-gray-500">
                   <p className="text-lg mb-4">No MCP servers configured</p>
                   <p className="text-sm">
@@ -219,12 +228,16 @@ function App() {
                 </div>
               )}
             </>
+          ) : config ? (
+            <JsonEditor config={config} onChange={handleJsonChange} />
           ) : (
-            config && <JsonEditor config={config} onChange={handleJsonChange} />
+            <div className="mt-4 text-sm text-gray-600">
+              設定を読み込めなかったため、JSONエディタを表示できません。別スコープを選択してください。
+            </div>
           )}
         </div>
 
-        {hasUnsavedChanges && (
+        {hasUnsavedChanges && isConfigAvailable && (
           <div className="mt-6 flex justify-end gap-3">
             <button
               onClick={handleDiscardChanges}
