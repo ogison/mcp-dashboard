@@ -167,7 +167,8 @@ function App() {
       <div className="max-w-7xl mx-auto p-6">
         {error && (
           <div className="mb-4 p-4 rounded-md border border-error/30 bg-error/5 text-error">
-            Error: {error}. 別のスコープを選択するか、設定ファイルを修正してください。
+            Error: {error}.
+            別のスコープを選択するか、設定ファイルを修正してください。
           </div>
         )}
 
