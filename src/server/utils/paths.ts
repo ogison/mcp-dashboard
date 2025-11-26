@@ -4,9 +4,14 @@ import fs from "fs/promises";
 import type { ConfigLocation, ConfigScope } from "../types/index.js";
 
 const CURSOR_CONFIG_FILENAME = "mcp.json";
+const VSCODE_CONFIG_FILENAME = "mcp.json";
 
 function getCursorConfigRelativePath(): string {
   return path.join(".cursor", CURSOR_CONFIG_FILENAME);
+}
+
+function getVscodeConfigRelativePath(): string {
+  return path.join(".vscode", VSCODE_CONFIG_FILENAME);
 }
 
 /**
@@ -80,6 +85,38 @@ export async function findCursorConfig(
   return null;
 }
 
+export async function findVscodeConfig(
+  startDir: string = process.cwd(),
+): Promise<string | null> {
+  const homeDir = os.homedir();
+  let currentDir = path.resolve(startDir);
+
+  while (true) {
+    const vscodePath = path.join(currentDir, getVscodeConfigRelativePath());
+
+    try {
+      await fs.access(vscodePath);
+      return vscodePath;
+    } catch {
+      // File doesn't exist, continue searching
+    }
+
+    if (currentDir === homeDir) {
+      break;
+    }
+
+    const parentDir = path.dirname(currentDir);
+
+    if (parentDir === currentDir) {
+      break;
+    }
+
+    currentDir = parentDir;
+  }
+
+  return null;
+}
+
 /**
  * Get Claude Code user config path (~/.claude.json)
  */
@@ -89,6 +126,10 @@ export function getUserMcpConfigPath(): string {
 
 export function getUserCursorConfigPath(): string {
   return path.join(os.homedir(), getCursorConfigRelativePath());
+}
+
+export function getUserVscodeConfigPath(): string {
+  return path.join(os.homedir(), getVscodeConfigRelativePath());
 }
 
 /**
@@ -120,7 +161,7 @@ export function getClaudeDesktopConfigPath(): string {
 
 /**
  * Get all possible config locations in priority order
- * Priority: .mcp.json > ~/.claude.json > claude_desktop_config.json
+ * Priority: .mcp.json > .cursor/mcp.json > .vscode/mcp.json > ~/.claude.json > claude_desktop_config.json
  */
 export async function getConfigLocations(
   startDir?: string,
@@ -166,7 +207,35 @@ export async function getConfigLocations(
     });
   }
 
-  // 3. User scope (~/.claude.json)
+  // 3. VS Code scope (.vscode/mcp.json)
+  const vscodeProjectPath = await findVscodeConfig(startDir);
+  const vscodeUserPath = getUserVscodeConfigPath();
+  let vscodeUserExists = false;
+  try {
+    await fs.access(vscodeUserPath);
+    vscodeUserExists = true;
+  } catch {
+    // File doesn't exist
+  }
+
+  if (vscodeProjectPath || vscodeUserPath) {
+    const directoryName = vscodeProjectPath
+      ? path.basename(path.dirname(vscodeProjectPath)) === ".vscode"
+        ? path.basename(path.dirname(path.dirname(vscodeProjectPath)))
+        : path.basename(path.dirname(vscodeProjectPath))
+      : "Home";
+
+    locations.push({
+      path: vscodeProjectPath || vscodeUserPath,
+      scope: "vscode",
+      exists: Boolean(vscodeProjectPath) || vscodeUserExists,
+      displayName: vscodeProjectPath
+        ? `.vscode/mcp.json (${directoryName})`
+        : "VS Code Config",
+    });
+  }
+
+  // 4. User scope (~/.claude.json)
   const userPath = getUserMcpConfigPath();
   let userExists = false;
   try {

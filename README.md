@@ -9,6 +9,7 @@ A GUI dashboard for managing Claude Code and Claude Desktop MCP (Model Context P
 ## Features
 
 - **Claude Code Support**: Full support for Claude Code's MCP configuration (.mcp.json, ~/.claude.json)
+- **VS Code MCP Support**: Configure VS Code MCP settings (.vscode/mcp.json, ~/.vscode/mcp.json)
 - **Multi-Scope Configuration**: Manage project-level, user-level, and Claude Desktop configs
 - **Easy Configuration**: Manage MCP servers through an intuitive web-based GUI
 - **Preset Support**: Quick setup with pre-configured MCP server templates
@@ -62,6 +63,12 @@ Options:
 
 The tool automatically detects and prioritizes configuration files in the following order:
 
+1. Project scope: `.mcp.json`
+2. Cursor scope: `.cursor/mcp.json`
+3. VS Code scope: `.vscode/mcp.json` (project) or `~/.vscode/mcp.json` (user)
+4. User scope: `~/.claude.json`
+5. Claude Desktop scope: platform-specific legacy path
+
 #### Claude Code (Recommended)
 
 **Project Scope** (`.mcp.json` in project directory):
@@ -76,6 +83,20 @@ The tool automatically detects and prioritizes configuration files in the follow
 - Personal settings shared across all projects
 - May contain additional Claude Code settings (theme, projects, etc.)
 - Priority: **Medium**
+
+#### VS Code MCP
+
+**Project Scope** (`.vscode/mcp.json` in project directory):
+
+- Searched upward from current directory to home directory
+- Works with VS Code MCP integrations
+- Priority: **High**
+
+**User Scope** (`~/.vscode/mcp.json`):
+
+- Stored under `.vscode` in the home directory
+- Useful for sharing VS Code MCP settings across projects
+- Priority: **Medium-High**
 
 #### Claude Desktop (Legacy Support)
 
