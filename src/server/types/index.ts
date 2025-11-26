@@ -19,7 +19,7 @@ export interface ClaudeUserConfig extends MCPConfig {
 }
 
 // Configuration file location and scope information
-export type ConfigScope = "project" | "user" | "claude-desktop";
+export type ConfigScope = "project" | "cursor" | "user" | "claude-desktop";
 
 export interface ConfigLocation {
   path: string;

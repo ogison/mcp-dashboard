@@ -3,6 +3,12 @@ import os from "os";
 import fs from "fs/promises";
 import type { ConfigLocation, ConfigScope } from "../types/index.js";
 
+const CURSOR_CONFIG_FILENAME = "mcp.json";
+
+function getCursorConfigRelativePath(): string {
+  return path.join(".cursor", CURSOR_CONFIG_FILENAME);
+}
+
 /**
  * Find .mcp.json by searching upward from current directory
  * Stops at home directory to avoid searching entire filesystem
@@ -42,11 +48,47 @@ export async function findProjectMcpConfig(
   return null;
 }
 
+export async function findCursorConfig(
+  startDir: string = process.cwd(),
+): Promise<string | null> {
+  const homeDir = os.homedir();
+  let currentDir = path.resolve(startDir);
+
+  while (true) {
+    const cursorPath = path.join(currentDir, getCursorConfigRelativePath());
+
+    try {
+      await fs.access(cursorPath);
+      return cursorPath;
+    } catch {
+      // File doesn't exist, continue searching
+    }
+
+    if (currentDir === homeDir) {
+      break;
+    }
+
+    const parentDir = path.dirname(currentDir);
+
+    if (parentDir === currentDir) {
+      break;
+    }
+
+    currentDir = parentDir;
+  }
+
+  return null;
+}
+
 /**
  * Get Claude Code user config path (~/.claude.json)
  */
 export function getUserMcpConfigPath(): string {
   return path.join(os.homedir(), ".claude.json");
+}
+
+export function getUserCursorConfigPath(): string {
+  return path.join(os.homedir(), getCursorConfigRelativePath());
 }
 
 /**
@@ -96,7 +138,35 @@ export async function getConfigLocations(
     });
   }
 
-  // 2. User scope (~/.claude.json)
+  // 2. Cursor scope (.cursor/mcp.json)
+  const cursorProjectPath = await findCursorConfig(startDir);
+  const cursorUserPath = getUserCursorConfigPath();
+  let cursorUserExists = false;
+  try {
+    await fs.access(cursorUserPath);
+    cursorUserExists = true;
+  } catch {
+    // File doesn't exist
+  }
+
+  if (cursorProjectPath || cursorUserPath) {
+    const directoryName = cursorProjectPath
+      ? path.basename(path.dirname(cursorProjectPath)) === ".cursor"
+        ? path.basename(path.dirname(path.dirname(cursorProjectPath)))
+        : path.basename(path.dirname(cursorProjectPath))
+      : "Home";
+
+    locations.push({
+      path: cursorProjectPath || cursorUserPath,
+      scope: "cursor",
+      exists: Boolean(cursorProjectPath) || cursorUserExists,
+      displayName: cursorProjectPath
+        ? `.cursor/mcp.json (${directoryName})`
+        : "Cursor Config",
+    });
+  }
+
+  // 3. User scope (~/.claude.json)
   const userPath = getUserMcpConfigPath();
   let userExists = false;
   try {
@@ -112,7 +182,7 @@ export async function getConfigLocations(
     displayName: "Claude Code Config",
   });
 
-  // 3. Claude Desktop scope (legacy)
+  // 5. Claude Desktop scope (legacy)
   const desktopPath = getClaudeDesktopConfigPath();
   let desktopExists = false;
   try {
@@ -139,7 +209,13 @@ export async function getConfigLocationByScope(
   startDir?: string,
 ): Promise<ConfigLocation | null> {
   const locations = await getConfigLocations(startDir);
-  return locations.find((loc) => loc.scope === scope) || null;
+  const matchingLocations = locations.filter((loc) => loc.scope === scope);
+  if (matchingLocations.length === 0) {
+    return null;
+  }
+
+  const existingLocation = matchingLocations.find((loc) => loc.exists);
+  return existingLocation || matchingLocations[0];
 }
 
 /**

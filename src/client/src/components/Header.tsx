@@ -14,6 +14,8 @@ function getScopeBadgeColor(scope?: ConfigScope): string {
   switch (scope) {
     case "project":
       return "bg-green-100 text-green-800 border-green-300";
+    case "cursor":
+      return "bg-teal-100 text-teal-800 border-teal-300";
     case "user":
       return "bg-blue-100 text-blue-800 border-blue-300";
     case "claude-desktop":
@@ -27,6 +29,8 @@ function getScopeLabel(scope?: ConfigScope): string {
   switch (scope) {
     case "project":
       return "Project";
+    case "cursor":
+      return "Cursor";
     case "user":
       return "User";
     case "claude-desktop":
@@ -87,7 +91,7 @@ export function Header({
                 disabled={isSwitchingScope}
               >
                 {locations.map((location) => (
-                  <option key={location.scope} value={location.scope}>
+                  <option key={`${location.scope}-${location.path}`} value={location.scope}>
                     {location.displayName}
                     {!location.exists ? " (create)" : ""}
                   </option>
