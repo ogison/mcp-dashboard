@@ -1,27 +1,21 @@
 import express, { Request, Response } from "express";
 import { ConfigManager } from "../services/configManager.js";
-import type {
+import {
   MCPConfig,
   ClaudeUserConfig,
   ApiResponse,
   ConfigPathResponse,
   ConfigInfoResponse,
   ConfigScope,
+  CONFIG_SCOPES,
 } from "../types/index.js";
 
 const router = express.Router();
 const configManager = new ConfigManager();
 
-const validScopes: ConfigScope[] = [
-  "project",
-  "cursor",
-  "user",
-  "claude-desktop",
-];
-
 function parseScope(scope?: string): ConfigScope | undefined {
   if (!scope) return undefined;
-  if (validScopes.includes(scope as ConfigScope)) {
+  if (CONFIG_SCOPES.includes(scope as ConfigScope)) {
     return scope as ConfigScope;
   }
   return undefined;

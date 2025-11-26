@@ -1,5 +1,12 @@
 import type { ConfigScope, ConfigLocation } from "../types";
 
+const scopeDisplayNames: Record<ConfigScope, string> = {
+  project: "Project",
+  cursor: "Cursor",
+  user: "User",
+  "claude-desktop": "Claude Desktop",
+};
+
 interface HeaderProps {
   configPath: string;
   configScope?: ConfigScope;
@@ -26,18 +33,7 @@ function getScopeBadgeColor(scope?: ConfigScope): string {
 }
 
 function getScopeLabel(scope?: ConfigScope): string {
-  switch (scope) {
-    case "project":
-      return "Project";
-    case "cursor":
-      return "Cursor";
-    case "user":
-      return "User";
-    case "claude-desktop":
-      return "Claude Desktop";
-    default:
-      return "Unknown";
-  }
+  return (scope ? scopeDisplayNames[scope] : undefined) ?? "Unknown";
 }
 
 export function Header({
@@ -95,7 +91,7 @@ export function Header({
                     key={`${location.scope}-${location.path}`}
                     value={location.scope}
                   >
-                    {location.displayName}
+                    {location.displayName || scopeDisplayNames[location.scope]}
                     {!location.exists ? " (create)" : ""}
                   </option>
                 ))}
