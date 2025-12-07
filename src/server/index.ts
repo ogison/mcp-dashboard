@@ -20,19 +20,31 @@ export function createApp(): Application {
   // Rate limiting for API endpoints
   const apiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // Limit each IP to 100 requests per windowMs
-    message: "Too many requests from this IP, please try again later.",
+    limit: 100, // Limit each IP to 100 requests per window
     standardHeaders: true,
     legacyHeaders: false,
+    handler: (_req: Request, res: Response) => {
+      res.status(429).json({
+        success: false,
+        message: "Too many requests from this IP, please try again later.",
+      });
+    },
   });
 
   // Stricter rate limiting for write operations
   const writeLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 20, // Limit each IP to 20 write requests per windowMs
-    message: "Too many write requests from this IP, please try again later.",
+    limit: 20, // Limit each IP to 20 write requests per window
     standardHeaders: true,
     legacyHeaders: false,
+    // Only apply the stricter limiter to non-GET requests
+    skip: (req) => req.method === "GET" || req.method === "HEAD",
+    handler: (_req: Request, res: Response) => {
+      res.status(429).json({
+        success: false,
+        message: "Too many write requests from this IP, please try again later.",
+      });
+    },
   });
 
   // Rate limiting for static files and HTML

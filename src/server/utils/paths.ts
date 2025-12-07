@@ -9,6 +9,32 @@ function getCursorConfigRelativePath(): string {
   return path.join(".cursor", CURSOR_CONFIG_FILENAME);
 }
 
+export function getVSCodeUserSettingsPath(): string {
+  const homeDir = os.homedir();
+  const platform = process.platform;
+
+  switch (platform) {
+    case "win32":
+      return path.join(
+        process.env.APPDATA || path.join(homeDir, "AppData", "Roaming"),
+        "Code",
+        "User",
+        "settings.json",
+      );
+    case "darwin":
+      return path.join(
+        homeDir,
+        "Library",
+        "Application Support",
+        "Code",
+        "User",
+        "settings.json",
+      );
+    default:
+      return path.join(homeDir, ".config", "Code", "User", "settings.json");
+  }
+}
+
 /**
  * Find .mcp.json by searching upward from current directory
  * Stops at home directory to avoid searching entire filesystem
@@ -138,7 +164,23 @@ export async function getConfigLocations(
     });
   }
 
-  // 2. Cursor scope (.cursor/mcp.json)
+  // 2. VS Code User scope (global settings.json)
+  const vscodeUserPath = getVSCodeUserSettingsPath();
+  let vscodeUserExists = false;
+  try {
+    await fs.access(vscodeUserPath);
+    vscodeUserExists = true;
+  } catch {
+    // File doesn't exist
+  }
+  locations.push({
+    path: vscodeUserPath,
+    scope: "vscode-user",
+    exists: vscodeUserExists,
+    displayName: "VS Code User Settings",
+  });
+
+  // 3. Cursor scope (.cursor/mcp.json)
   const cursorProjectPath = await findCursorConfig(startDir);
   const cursorUserPath = getUserCursorConfigPath();
   let cursorUserExists = false;
@@ -166,7 +208,7 @@ export async function getConfigLocations(
     });
   }
 
-  // 3. User scope (~/.claude.json)
+  // 4. User scope (~/.claude.json)
   const userPath = getUserMcpConfigPath();
   let userExists = false;
   try {

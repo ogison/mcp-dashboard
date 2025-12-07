@@ -11,6 +11,7 @@ import {
   getBackupPath,
   getActiveConfigLocation,
   getConfigLocations,
+  getVSCodeUserSettingsPath,
 } from "../utils/paths.js";
 import {
   fileExists,
@@ -28,10 +29,99 @@ export class ConfigManager {
   }
 
   /**
+   * Extract mcpServers from VS Code user settings.json
+   * Supports several key styles to avoid breaking existing data
+   */
+  private extractVSCodeUserMcpServers(
+    settings: Record<string, unknown>,
+  ): MCPConfig["mcpServers"] {
+    const mcpNested =
+      settings &&
+      typeof settings === "object" &&
+      settings !== null &&
+      (settings as any).mcp &&
+      typeof (settings as any).mcp === "object" &&
+      (settings as any).mcp !== null
+        ? (settings as any).mcp.servers
+        : undefined;
+
+    const mcpDot = (settings as any)["mcp.servers"];
+    const mcpFlat = (settings as any).mcpServers;
+
+    const candidate =
+      (typeof mcpNested === "object" && mcpNested !== null
+        ? mcpNested
+        : null) ||
+      (typeof mcpDot === "object" && mcpDot !== null ? mcpDot : null) ||
+      (typeof mcpFlat === "object" && mcpFlat !== null ? mcpFlat : null);
+
+    return (candidate as MCPConfig["mcpServers"]) || {};
+  }
+
+  private async loadVSCodeUserConfig(): Promise<MCPConfig> {
+    const settingsPath = getVSCodeUserSettingsPath();
+    const exists = await fileExists(settingsPath);
+
+    if (!exists) {
+      return { mcpServers: {} };
+    }
+
+    const settings = await readJsonFile<Record<string, unknown>>(settingsPath);
+    return { mcpServers: this.extractVSCodeUserMcpServers(settings) };
+  }
+
+  private async saveVSCodeUserConfig(config: MCPConfig): Promise<void> {
+    const settingsPath = getVSCodeUserSettingsPath();
+    const exists = await fileExists(settingsPath);
+    const settings = exists
+      ? await readJsonFile<Record<string, unknown>>(settingsPath)
+      : {};
+
+    const hasDotStyle =
+      typeof (settings as any)["mcp.servers"] === "object" &&
+      (settings as any)["mcp.servers"] !== null;
+    const hasNestedStyle =
+      typeof (settings as any).mcp === "object" &&
+      (settings as any).mcp !== null &&
+      typeof (settings as any).mcp.servers === "object";
+    const hasFlatStyle =
+      typeof (settings as any).mcpServers === "object" &&
+      (settings as any).mcpServers !== null;
+
+    if (hasDotStyle) {
+      (settings as any)["mcp.servers"] = config.mcpServers;
+    } else if (hasNestedStyle) {
+      (settings as any).mcp = {
+        ...(settings as any).mcp,
+        servers: config.mcpServers,
+      };
+    } else if (hasFlatStyle) {
+      (settings as any).mcpServers = config.mcpServers;
+    } else {
+      (settings as any).mcp = {
+        ...(typeof (settings as any).mcp === "object" &&
+        (settings as any).mcp !== null
+          ? (settings as any).mcp
+          : {}),
+        servers: config.mcpServers,
+      };
+    }
+
+    if (exists) {
+      await this.backupConfig(settingsPath);
+    }
+    await writeJsonFile(settingsPath, settings);
+  }
+
+  /**
    * Load config from the active config file
    * Returns mcpServers even if file contains additional fields
    */
   async loadConfig(scope?: ConfigScope): Promise<MCPConfig> {
+    if (scope === "vscode-user") {
+      return this.loadVSCodeUserConfig();
+    }
+
     const configPath = await getConfigPath(undefined, scope);
     const exists = await fileExists(configPath);
 
@@ -55,6 +145,10 @@ export class ConfigManager {
   async loadFullConfig(
     scope?: ConfigScope,
   ): Promise<ClaudeUserConfig | MCPConfig> {
+    if (scope === "vscode-user") {
+      return this.loadVSCodeUserConfig();
+    }
+
     const configPath = await getConfigPath(undefined, scope);
     const exists = await fileExists(configPath);
 
@@ -78,6 +172,10 @@ export class ConfigManager {
     config: MCPConfig | ClaudeUserConfig,
     scope?: ConfigScope,
   ): Promise<void> {
+    if (scope === "vscode-user") {
+      return this.saveVSCodeUserConfig({ mcpServers: config.mcpServers });
+    }
+
     // Validate mcpServers
     const validationResult = this.validateConfig({
       mcpServers: config.mcpServers,
