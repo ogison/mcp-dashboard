@@ -42,7 +42,8 @@ export function createApp(): Application {
     handler: (_req: Request, res: Response) => {
       res.status(429).json({
         success: false,
-        message: "Too many write requests from this IP, please try again later.",
+        message:
+          "Too many write requests from this IP, please try again later.",
       });
     },
   });
